@@ -25,3 +25,6 @@ client/yarn-error.log*
 
 ###server
 server/node_modules
+
+#password for db
+server/db_key.js
