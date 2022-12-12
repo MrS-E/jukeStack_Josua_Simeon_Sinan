@@ -1,4 +1,4 @@
-import { key } from "./db_key";
+import { key } from "./db_key"; //keyfile with has an exported const with db key (file is in .gitignore)
 const express = require("express");
 const app = express();
 const mysql = require("mysql");
