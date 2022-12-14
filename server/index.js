@@ -2,7 +2,7 @@ import { key } from "./db_key.js"; //keyfile with has an exported const with db 
 import sha256 from "crypto-js/sha256";
 const express = require("express");
 const mysql = require("mysql");
-let schedule = require('node-schedule');
+const schedule = require('node-schedule');
 const cors = require("cors");
 const bodyParser = require("body-parser");
 
