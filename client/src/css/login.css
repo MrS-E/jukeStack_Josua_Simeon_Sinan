@@ -3,12 +3,17 @@ body {
   padding: 0;
   background-color: #ee9949ba;
   font-family: "Arial";
+  position: absolute;
+  top: 0px;
+  right: 0px;
+  bottom: 0px;
+  left: 0px;
 }
 .login {
   width: 382px;
   overflow: hidden;
   margin: auto;
-  margin: 20 0 0 450px;
+  margin-top: center;
   padding: 80px;
   background: #23463f;
   border-radius: 15px;
