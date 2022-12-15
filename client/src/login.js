@@ -34,8 +34,7 @@ function LOGIN(props) {
             name="reg"
             id="button"
             value="Register Now"
-            as={Link}
-            to="/register.js"
+            onClick={()=>{props.changepage("register")}}
           ></input>
         </form>
       </div>
