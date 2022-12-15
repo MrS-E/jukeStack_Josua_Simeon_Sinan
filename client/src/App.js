@@ -1,20 +1,19 @@
+import { useState } from "react";
+import LOGIN from "./login.js";
 
 function App() {
+  const [user, changeUser] = useState("");
+  const [page, changepage] = useState("");
+  if (page === "login.js") {
+    return (
+      <div className="App">
+        <LOGIN changepage={changepage}></LOGIN>
+      </div>
+    );
+  }
   return (
     <div className="App">
-      <header className="App-header">
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <LOGIN changeUser={changeUser}></LOGIN>
     </div>
   );
 }
