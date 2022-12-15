@@ -1,5 +1,5 @@
-import { key } from "./db_key.js"; //keyfile with has an exported const with db key (file is in .gitignore)
-import sha256 from "crypto-js/sha256.js";
+const key = require("./db_key.js"); //keyfile with has an exported const with db key (file is in .gitignore)
+const sha256 = require("crypto-js/sha256.js");
 const express = require("express");
 const mysql = require("mysql");
 const schedule = require('node-schedule');
