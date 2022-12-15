@@ -1,5 +1,5 @@
 import { key } from "./db_key.js"; //keyfile with has an exported const with db key (file is in .gitignore)
-import sha256 from "crypto-js/sha256";
+import sha256 from "crypto-js/sha256.js";
 const express = require("express");
 const mysql = require("mysql");
 const schedule = require('node-schedule');
@@ -75,7 +75,7 @@ app.get("/list", (req, res)=>{
 app.post("/lend", (req, res)=>{
     const token = req.body.NFToken;
     const userMail = req.body.mail;
-    db.query("select count(*) from TLendings where UsMail = '(?)' and LenEnd is null;", //TODO (Joscupe) select all active lends from user
+    db.query("select count(*) from TLendings where UsMail = '?' and LenEnd is null;", //TODO (Joscupe) select all active lends from user
         [userMail],
         (err, result)=>{
         if(err){
@@ -120,8 +120,6 @@ app.get("/lendings", (req, res)=>{
 });
 
 app.put("/return", (req, res)=>{
-    const user = req.body.mail; // Don't need it
-    const NFToken = req.body.NFtoken; // Don't need it
     const LenID = req.body.songId;
     db.query("update TLendings set LenEnd = now() where LenId = (?);", //TODO (Joscupe) update of lending with end time. -> (MrS-E) edit of function
         [/*user,NFToken,*/LenID],
@@ -135,7 +133,7 @@ app.put("/return", (req, res)=>{
         });
 });
 
-schedule.scheduleJob('0 0 * * *', ()=>{ //runs every 24h at 0:0 // when is a lending expired? extra function
+schedule.scheduleJob('0 0 * * *', ()=>{ //runs every 24h at 0:0 // when is a lending expired? extra function!
     db.query("", //TODO (Joscupe) select all lendings which have expired or which have no end date (would be nice if start date = 5 days in the past (if not additions are needed by (MrS-E)))
         (err, result)=>{
             if(err){
