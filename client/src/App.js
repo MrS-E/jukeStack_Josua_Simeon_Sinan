@@ -1,5 +1,6 @@
 import { useState } from "react";
 import LOGIN from "./login.js";
+import REGISTER from "./register.js";
 
 function App() {
   const [user, changeUser] = useState("");
@@ -10,11 +11,11 @@ function App() {
         <LOGIN changepage={changepage}></LOGIN>
       </div>
     );
-  }else {
+  } else {
     return (
-        <div className="App">
-         hey
-        </div>
+      <div className="App">
+        <REGISTER changepage={changepage}></REGISTER>
+      </div>
     );
   }
 }
