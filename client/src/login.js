@@ -33,7 +33,15 @@ function LOGIN(props) {
           ></input>
           <br></br>
           <br></br>
-          <input type="button" id="login" value="Log In" class="button"></input>
+          <input
+            type="button"
+            id="login"
+            value="Log In"
+            class="button"
+            onClick={() => {
+              props.changepage("nft");
+            }}
+          ></input>
           <br></br>
           <input
             type="button"
