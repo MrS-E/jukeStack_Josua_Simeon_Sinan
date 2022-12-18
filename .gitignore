@@ -1,6 +1,5 @@
 .idea
 
-
 ###client
 client/node_modules
 client/.pnp
@@ -27,4 +26,4 @@ client/yarn-error.log*
 server/node_modules
 
 #password for db
-server/keys.env
+server/db-key.js
