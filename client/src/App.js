@@ -5,6 +5,12 @@ import NFT from "./nft.js";
 
 function App() {
   const [user, changeUser] = useState("");
+  const [logemail, changeLogemail] = useState("");
+  const [logpw, changeLogpw] = useState("");
+  const [regfname, changeRegfname] = useState("");
+  const [reglname, changeReglname] = useState("");
+  const [regemail, changeRegemail] = useState("");
+  const [regpw, changeRegpw] = useState("");
   const [page, changepage] = useState("login");
   if (page === "login") {
     return (

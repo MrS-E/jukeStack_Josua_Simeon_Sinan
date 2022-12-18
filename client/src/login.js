@@ -2,6 +2,8 @@ import { BrowserRouter, Link, Route, Switch } from "react-router-dom";
 import reactjs from "react";
 import "./css/main.css";
 
+
+
 function LOGIN(props) {
   //if button clicked props.changeUser("user")
   return (
@@ -21,6 +23,9 @@ function LOGIN(props) {
             id="email"
             placeholder="Username"
             class="textfield"
+            onChange={(event) => {
+              props.changeLogemail(event.target.value);
+            }}
           ></input>
           <br></br>
           <br></br>
@@ -30,6 +35,9 @@ function LOGIN(props) {
             id="pword"
             placeholder="Password"
             class="textfield"
+            onChange={(event) => {
+              props.changeLogpw(event.target.value);
+            }}
           ></input>
           <br></br>
           <br></br>
