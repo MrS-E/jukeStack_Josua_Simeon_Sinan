@@ -120,8 +120,6 @@ app.get("/lendings", (req, res)=>{
 });
 
 app.put("/return", (req, res)=>{
-    const user = req.body.mail; // Don't need it
-    const NFToken = req.body.NFtoken; // Don't need it
     const LenID = req.body.songId;
     db.query("update TLendings set LenEnd = now() where LenId = (?);",
         [/*user,NFToken,*/LenID],
@@ -135,7 +133,7 @@ app.put("/return", (req, res)=>{
         });
 });
 
-schedule.scheduleJob('0 0 * * *', ()=>{ //runs every 24h at 0:0 // when is a lending expired? extra function
+schedule.scheduleJob('0 0 * * *', ()=>{ //runs every 24h at 0:0 // when is a lending expired? extra function!
     db.query("", //TODO (Joscupe) select all lendings which have expired or which have no end date (would be nice if start date = 5 days in the past (if not additions are needed by (MrS-E)))
         (err, result)=>{
             if(err){
