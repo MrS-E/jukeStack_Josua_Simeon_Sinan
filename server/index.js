@@ -4,7 +4,6 @@ const mysql = require("mysql");
 const schedule = require('node-schedule');
 const cors = require("cors");
 const bodyParser = require("body-parser");
-require('dotenv').config();
 
 const app = express();
 app.use(cors());
@@ -13,11 +12,15 @@ app.use(bodyParser.json()); //to manage the parsing of the body from react app
 const db = mysql.createConnection({ //DB Connection
     user: "jukSiSiJo",
     host: "i-kf.ch",
-    password: process.env.DB_KEY, //careful key is in not sync file "keys.env" like (DB_KEY="...")
+    password: process.env.DB_KEY || require("./variables").DB_KEY, //careful key is in not sync file "keys.env" like (DB_KEY="...")
     database: "jukeStackDB_SimeonSinanJosua",
 });
 
-app.get("/login", (req, res)=>{
+app.get("/", (req, res)=>{
+    res.send("Server is running")
+})
+
+app.post("/login", (req, res)=>{
     const mail = req.body.mail;
     const password = sha256(req.body.password);
     db.query("select UsPasswd from TUsers where UsMail = (?)", //select user which has the password
@@ -100,8 +103,8 @@ app.post("/lend", (req, res)=>{
         })
 });
 
-app.get("/lendings", (req, res)=>{
-    const userMail = req.body.mail;
+app.get("/lendings/:user", (req, res)=>{
+    const userMail = req.params.user;
     db.query("select distinct UsFName, USSName, NFName, NFInterpret, NFLength, NFYear, LenStart from TUsers natural join TLendings l natural join TNFTSongs where l.UsMail = (?);",
         [userMail],
         (err, result)=>{
@@ -119,8 +122,8 @@ app.get("/lendings", (req, res)=>{
     );
 });
 
-app.put("/return", (req, res)=>{
-    const LenID = req.body.songId;
+app.put("/return/:id", (req, res)=>{
+    const LenID = req.params.id;
     db.query("update TLendings set LenEnd = now() where LenId = (?);",
         [/*user,NFToken,*/LenID],
         (err)=>{
@@ -152,6 +155,6 @@ schedule.scheduleJob('0 0 * * *', ()=>{ //runs every 24h at 0:0 // when is a len
         });
 });
 
-app.listen(8080, () => {
-    console.log("Server started at port 8080");
+app.listen(require("./variables").PORT, () => {
+    console.log("Server started at port "+ require("./variables").PORT);
 });
