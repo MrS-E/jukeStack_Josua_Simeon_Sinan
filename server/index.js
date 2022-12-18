@@ -1,19 +1,19 @@
-import { key } from "./db_key.js"; //keyfile with has an exported const with db key (file is in .gitignore)
-import sha256 from "crypto-js/sha256";
+const sha256 = require("crypto-js/sha256");
 const express = require("express");
 const mysql = require("mysql");
 const schedule = require('node-schedule');
 const cors = require("cors");
 const bodyParser = require("body-parser");
+require('dotenv').config();
 
 const app = express();
 app.use(cors());
 app.use(bodyParser.json()); //to manage the parsing of the body from react app
 
 const db = mysql.createConnection({ //DB Connection
-    user: "jukSiSiJo", //TODO (Joscupe) user
+    user: "jukSiSiJo",
     host: "i-kf.ch",
-    password: key, //careful key is in not sync file "db_key.js" under key const
+    password: process.env.DB_KEY, //careful key is in not sync file "keys.env" like (DB_KEY="...")
     database: "jukeStackDB_SimeonSinanJosua",
 });
 
@@ -47,7 +47,7 @@ app.post("/register", (req, res) => {
     const last = req.body.lastName;
     const password = sha256(req.body.password);
 
-    db.query("insert into TUsers values(?,?,?,?,?)", //TODO (Joscupe) insert user
+    db.query("insert into TUsers values(?,?,?,?,?)",
         [mail, salutation,first,last,password],
         (err) => {
             if (err) {
@@ -61,7 +61,7 @@ app.post("/register", (req, res) => {
 });
 
 app.get("/list", (req, res)=>{
-    db.query("select * from TNFTSongs",//TODO (Joscupe) select all songs from db
+    db.query("select * from TNFTSongs",
         (err, result)=>{
         if(err){
             console.log("list:",err);
@@ -75,7 +75,7 @@ app.get("/list", (req, res)=>{
 app.post("/lend", (req, res)=>{
     const token = req.body.NFToken;
     const userMail = req.body.mail;
-    db.query("select count(*) from TLendings where UsMail = '(?)' and LenEnd is null;", //TODO (Joscupe) select all active lends from user
+    db.query("select count(*) from TLendings where UsMail = '(?)' and LenEnd is null;",
         [userMail],
         (err, result)=>{
         if(err){
@@ -83,7 +83,7 @@ app.post("/lend", (req, res)=>{
             res.send({lend:false, error: err})
         }else{
             if(result.length<5){
-                db.query("insert into TLandings(LenStart, NFToken, UsMail) values(now(), ?,?) ", //TODO (Joscupe) insert TLendings
+                db.query("insert into TLandings(LenStart, NFToken, UsMail) values(now(), ?,?) ",
                     [token, userMail],
                     (err) => {
                         if(err){
@@ -102,7 +102,7 @@ app.post("/lend", (req, res)=>{
 
 app.get("/lendings", (req, res)=>{
     const userMail = req.body.mail;
-    db.query("select distinct UsFName, USSName, NFName, NFInterpret, NFLength, NFYear, LenStart from TUsers natural join TLendings l natural join TNFTSongs where l.UsMail = (?);", //TODO (Joscupe) select all lend songs from user which have no end date (if return with deletion additions are needed by (MrS-E)).
+    db.query("select distinct UsFName, USSName, NFName, NFInterpret, NFLength, NFYear, LenStart from TUsers natural join TLendings l natural join TNFTSongs where l.UsMail = (?);",
         [userMail],
         (err, result)=>{
         if(err){
@@ -123,7 +123,7 @@ app.put("/return", (req, res)=>{
     const user = req.body.mail; // Don't need it
     const NFToken = req.body.NFtoken; // Don't need it
     const LenID = req.body.songId;
-    db.query("update TLendings set LenEnd = now() where LenId = (?);", //TODO (Joscupe) update of lending with end time. -> (MrS-E) edit of function
+    db.query("update TLendings set LenEnd = now() where LenId = (?);",
         [/*user,NFToken,*/LenID],
         (err)=>{
         if(err){
