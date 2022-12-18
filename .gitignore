@@ -27,4 +27,4 @@ client/yarn-error.log*
 server/node_modules
 
 #password for db
-server/keys.env
+server/db_key.js

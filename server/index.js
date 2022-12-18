@@ -3,11 +3,10 @@ const express = require("express");
 const mysql = require("mysql");
 const schedule = require('node-schedule');
 const cors = require("cors");
-const bodyParser = require("body-parser");
 
 const app = express();
 app.use(cors());
-app.use(bodyParser.json()); //to manage the parsing of the body from react app
+app.use(express.json()); //to manage the parsing of the body from react app
 
 const db = mysql.createConnection({ //DB Connection
     user: "jukSiSiJo",
@@ -44,11 +43,14 @@ app.post("/login", (req, res)=>{
 });
 
 app.post("/register", (req, res) => {
+    console.log("register")
+    console.log(req);
     const mail = req.body.mail;
     const salutation = req.body.salutation;
     const first = req.body.firstName;
     const last = req.body.lastName;
     const password = sha256(req.body.password);
+    console.log(req.body.password);
 
     db.query("insert into TUsers values(?,?,?,?,?)",
         [mail, salutation,first,last,password],
