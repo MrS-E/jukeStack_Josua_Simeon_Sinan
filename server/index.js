@@ -1,6 +1,6 @@
 const sha256 = require("crypto-js/sha256");
 const express = require("express");
-const mysql = require("mysql");
+const mariadb = require("./mariadb").mariadb;
 const schedule = require('node-schedule');
 const cors = require("cors");
 
@@ -8,28 +8,29 @@ const app = express();
 app.use(cors());
 app.use(express.json()); //to manage the parsing of the body from react app
 
-const db = mysql.createConnection({ //DB Connection
+const db = new mariadb({
     user: "jukSiSiJo",
     host: "i-kf.ch",
-    password: process.env.DB_KEY || require("./variables").DB_KEY, //careful key is in not sync file "keys.env" like (DB_KEY="...")
-    database: "jukeStackDB_SimeonSinanJosua",
-});
+    password: process.env.DB_KEY || require("./variables").DB_KEY,
+    database: "jukeStackDB_SimeonSinanJosua"
+})
 
 app.get("/", (req, res)=>{
     res.send("Server is running")
 })
 
 app.post("/login", (req, res)=>{
+    console.log(req)
     const mail = req.body.mail;
     const password = sha256(req.body.password);
     db.query("select UsPasswd from TUsers where UsMail = (?)", //select user which has the password
-        [mail],
-        (err, result) => {
-        if(err){
-            console.log("login:",err)
-            res.send({login:false, error: err})
+        [mail]).then(
+        (result) => {
+        if(result.typ === "error"){
+            console.log("login:",result.data)
+            res.send({login:false, error: result.data, body:req.body})
         }else{
-            if(result.length===1){
+            if(result.data.length===1){
                 if(password===result[0]){
                     result.send({login:true, user: mail, error: null})
                 }else{
@@ -66,13 +67,14 @@ app.post("/register", (req, res) => {
 });
 
 app.get("/list", (req, res)=>{
-    db.query("select * from TNFTSongs",
-        (err, result)=>{
-        if(err){
-            console.log("list:",err);
-            res.send({result: null, error: err});
+    db.query("select * from TNFTSongs").then(
+        (result)=>{
+            console.log(result)
+        if(result.typ==="error"){
+            console.log("list:",result.data);
+            res.send({result: null, error: result.data});
         }else{
-            res.send({result: result});
+            res.send({result: result.data});
         }
     });
 });
@@ -81,19 +83,19 @@ app.post("/lend", (req, res)=>{
     const token = req.body.NFToken;
     const userMail = req.body.mail;
     db.query("select count(*) from TLendings where UsMail = '(?)' and LenEnd is null;",
-        [userMail],
-        (err, result)=>{
-        if(err){
-            console.log("lend (select):", err)
-            res.send({lend:false, error: err})
+        [userMail]).then(
+        (result)=>{
+        if(result.typ==="error"){
+            console.log("lend (select):", result.data)
+            res.send({lend:false, error: result.data})
         }else{
-            if(result.length<5){
+            if(result.data.length<5){
                 db.query("insert into TLandings(LenStart, NFToken, UsMail) values(now(), ?,?) ",
-                    [token, userMail],
-                    (err) => {
-                        if(err){
-                            console.log("lend (insert):", err);
-                            res.send({lend:false, error:err})
+                    [token, userMail]).then(
+                    (result) => {
+                        if(result.typ === "error"){
+                            console.log("lend (insert):", result.data);
+                            res.send({lend:false, error: result.data})
                         }else{
                             res.send({lend: true})
                         }
@@ -108,14 +110,14 @@ app.post("/lend", (req, res)=>{
 app.get("/lendings/:user", (req, res)=>{
     const userMail = req.params.user;
     db.query("select distinct UsFName, USSName, NFName, NFInterpret, NFLength, NFYear, LenStart from TUsers natural join TLendings l natural join TNFTSongs where l.UsMail = (?);",
-        [userMail],
-        (err, result)=>{
-        if(err){
-            console.log("lendings:",err);
-            res.send({lending:undefined, error:err});
+        [userMail]).then(
+        (result)=>{
+        if(result.typ==="error"){
+            console.log("lendings:",result.data);
+            res.send({lending:undefined, error:result.data});
         }else{
             if(result.length>0) {
-                res.send({lending: result});
+                res.send({lending: result.data});
             }else{
                 res.send({lending:null, error:"user has nothing rented"})
             }
@@ -127,13 +129,13 @@ app.get("/lendings/:user", (req, res)=>{
 app.put("/return/:id", (req, res)=>{
     const LenID = req.params.id;
     db.query("update TLendings set LenEnd = now() where LenId = (?);",
-        [/*user,NFToken,*/LenID],
-        (err)=>{
-        if(err){
-            console.log("return:",err);
-            res.send({return:false, error:err})
+        [/*user,NFToken,*/LenID]).then(
+        (result)=>{
+        if(result.typ==="error"){
+            console.log("return:",result.data);
+            res.send({return:false, error:result.data})
         }else{
-            res.send({return:true, song: NFToken, user: user});
+            res.send({return:true, /*song: NFToken, user: user*/});
         }
         });
 });
@@ -146,10 +148,10 @@ schedule.scheduleJob('0 0 * * *', ()=>{ //runs every 24h at 0:0 // when is a len
             }else{
                 result.forEach((d)=>{
                     db.query("", //TODO (Joscupe) update lending with end date -> if deletion additions are needed here by (MrS-E & Joscupe)
-                        [d.LenId],
-                        (err)=>{
-                            if(err){
-                                console.log(err);
+                        [d.LenId]).then(
+                        (result)=>{
+                            if(result.typ==="error"){
+                                console.log(result.data);
                             }
                         });
                 });
