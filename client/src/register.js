@@ -28,7 +28,9 @@ function submitcheck(
   errorpw,
   errorpwrep,
   changepage,
-  changeerror
+  changeerror,
+  changeRegpw,
+  adduser
 ) {
   let pw = document.getElementById("pword").value;
   let pwrep = document.getElementById("rpword").value;
@@ -42,6 +44,8 @@ function submitcheck(
       errorpwrep === ""
     ) {
       changepage("login");
+      changeRegpw(pw);
+      adduser();
     }
   } else {
     changeerror("Password doesn't match with first Password");
@@ -145,7 +149,9 @@ function REGISTER(props) {
                 errorpw,
                 errorpwrep,
                 props.changepage,
-                changeerrorpwrep
+                changeerrorpwrep,
+                props.changeRegpw,
+                props.adduser
               );
             }}
           ></input>

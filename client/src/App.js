@@ -2,6 +2,7 @@ import { useState } from "react";
 import LOGIN from "./login.js";
 import REGISTER from "./register.js";
 import NFT from "./nft.js";
+import Axios from "axios";
 
 function App() {
   const [user, changeUser] = useState("");
@@ -12,6 +13,16 @@ function App() {
   const [regemail, changeRegemail] = useState("");
   const [regpw, changeRegpw] = useState("");
   const [page, changepage] = useState("login");
+
+  const adduser = () => {
+    Axios.post("http://localhost:3001/create", {
+      firstname: regfname,
+      lastname: reglname,
+      username: regemail,
+      password: regpw,
+    });
+  };
+
   if (page === "login") {
     return (
       <div className="App">

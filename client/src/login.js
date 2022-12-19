@@ -1,10 +1,26 @@
 import { BrowserRouter, Link, Route, Switch } from "react-router-dom";
-import reactjs from "react";
+import reactjs, { useState } from "react";
 import "./css/main.css";
 
+function charactercheck(changeerror, input, type) {
+  let regexemail = /^([a-zA-Z0-9_\-\.]+)@([a-zA-Z0-9_\-\.]+)\.([a-zA-Z]{2,5})$/;
+  let regexpw =
+    /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&#])[A-Za-z\d@$!%*?&#]{8,64}$/;
 
+  if (!regexemail.test(input) && type === "username") {
+    changeerror("Please enter a username");
+  } else if (!regexpw.test(input) && type === "pw") {
+    changeerror(
+      "Please enter a password with 8-64 characters upper and lower case letters, numbers and special characters"
+    );
+  } else {
+    changeerror("");
+  }
+}
 
 function LOGIN(props) {
+  let [errorusername, changeerrorusername] = useState(" ");
+  let [errorpw, changeerrorpw] = useState(" ");
   //if button clicked props.changeUser("user")
   return (
     <body>
@@ -24,11 +40,17 @@ function LOGIN(props) {
             placeholder="Username"
             class="textfield"
             onChange={(event) => {
+              charactercheck(
+                changeerrorusername,
+                event.target.value,
+                "username"
+              );
               props.changeLogemail(event.target.value);
             }}
           ></input>
-          <br></br>
-          <br></br>
+
+          <p>{errorusername}</p>
+
           <label for="pword">Password:</label>
           <input
             type="Password"
@@ -36,11 +58,13 @@ function LOGIN(props) {
             placeholder="Password"
             class="textfield"
             onChange={(event) => {
+              charactercheck(changeerrorpw, event.target.value, "pw");
               props.changeLogpw(event.target.value);
             }}
           ></input>
-          <br></br>
-          <br></br>
+
+          <p>{errorpw}</p>
+
           <input
             type="button"
             id="login"
