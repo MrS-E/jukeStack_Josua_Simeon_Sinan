@@ -11,14 +11,16 @@ class mariadb_handler{
     }
 
     async query(query, attr){
+
         if(attr!==undefined && attr!==null) {
             const regex = /\?/i;
             for (let x = 0; x < attr.length; x++) {
-                query = query.replace(regex, attr[x]);
+                query = query.replace(regex, "\'"+attr[x]+"\'");
             }
         }
         //let out;
         //let err;
+        console.log(query)
         try {
             let conn = await this.db.getConnection();
             let out = await conn.query(query);

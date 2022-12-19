@@ -42,23 +42,24 @@ function App() {
     const [salu, setSalu] = useState("Sir")
 
     const onOptionChange = e => {
-        setSalu(e.target.value)
+        setSalu(e)
     }
     const [regData, changerRegData] = useState({});
 
-
     useEffect(() => {
-        console.log(user, passwd)
-        axios.post("http://localhost:5000/register", regData).then(
-            (res) => {
-                console.log(res);
-                if(!res.data.register){
-                    changeFailed("Wrong password or e-mail.")
-                    sub_reg_ref.current.removeAttribute("disabled")
+        console.log(regData)
+        if(regData.user) {
+            axios.post("http://localhost:5000/register", regData).then(
+                (res) => {
+                    console.log(res);
+                    if (!res.data.register) {
+                        changeFailed("Wrong password or e-mail.")
+                        sub_reg_ref.current.removeAttribute("disabled")
+                    }
                 }
-            }
-        )
-    }, )
+            )
+        }
+    }, [regData])
     const handleClick_register = () =>{
         sub_reg_ref.current.setAttribute("disabled", true)
         changerRegData({
@@ -85,8 +86,8 @@ function App() {
                                 <div className="App">
                                     <h1>register:</h1>
                                     <p>salutation</p>
-                                    <input name={"sal"} type={"radio"} checked={salu === "Sir"} nChange={onOptionChange}/><span>Sir</span><br/>
-                                    <input name={"sal"} type={"radio"} checked={salu === "Madam"} onChange={onOptionChange}/><span>Madam</span><br/>
+                                    <input name={"sal"} type={"radio"} checked={salu === "Sir"} onChange={()=>onOptionChange("Sir")}/><span>Sir</span><br/>
+                                    <input name={"sal"} type={"radio"} checked={salu === "Madam"} onChange={()=>onOptionChange("Madam")}/><span>Madam</span><br/>
                                     <p>first name</p>
                                     <input ref={fname_reg_ref} type={"text"}/>
                                     <p>last name</p>
