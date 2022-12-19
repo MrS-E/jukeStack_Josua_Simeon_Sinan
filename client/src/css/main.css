@@ -33,6 +33,13 @@ h2 {
   color: #277582;
   padding: 20px;
 }
+p {
+  font-family: "Arial";
+  font-size: 11px;
+  color: red;
+  margin-top: 5px;
+  margin-left: 37px;
+}
 label {
   color: #08ffd1;
   font-size: 17px;

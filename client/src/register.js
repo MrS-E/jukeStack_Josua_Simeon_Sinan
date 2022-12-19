@@ -1,23 +1,39 @@
 import { BrowserRouter, Link, Route, Switch } from "react-router-dom";
-import reactjs from "react";
+import reactjs, { useState } from "react";
 import "./css/main.css";
 
-function nonumbers(input){
-  var regex = /[^0-9]/gi;
-  input.value = input.value.replace(regex,"");
+function namecheck(changeerror) {
+  let input = "";
+  let regex = /[^a-zA-Z]+$/;
+
+  if (changeerror === "changeerrorfname") {
+    input = document.getElementById("fname");
+  } else if (changeerror === "changeerrorlname") {
+  }
+
+  if (regex.test(input)) {
+    console.log("error");
+    changeerror("Please enter a valid name");
+  } else {
+    changeerror("");
+  }
 }
 
-function nospecialcharacters(input){
+function emailcheck(input) {
   var regex = /[^0-9]/gi;
-  input.value = input.value.replace(regex,"");
+  input.value = input.value.replace(regex, "");
 }
 
-function noinjectioncharacters(input){
+function pwcheck(input) {
   var regex = /[^0-9]/gi;
-  input.value = input.value.replace(regex,"");
+  input.value = input.value.replace(regex, "");
 }
 
 function REGISTER(props) {
+  let [errorfname, changeerrorfname] = useState("");
+  let [errorlname, changeerrorlname] = useState("");
+  let [erroremail, changeerroremail] = useState("");
+  let [errorpw, changeerrorpw] = useState("");
   return (
     <body>
       <title>Register Form</title>
@@ -36,14 +52,11 @@ function REGISTER(props) {
             class="textfield"
             placeholder="Max"
             onChange={(event) => {
-              nonumbers(this);
-              nospecialcharacters(this);
-              noinjectioncharacters(this);
+              namecheck(changeerrorfname);
               props.changeRegfname(event.target.value);
             }}
           ></input>
-          <br></br>
-          <br></br>
+          <p>{errorfname}</p>
 
           <label for="lname">Last Name:</label>
           <br></br>
@@ -53,14 +66,11 @@ function REGISTER(props) {
             class="textfield"
             placeholder="Mustermann"
             onChange={(event) => {
-              nonumbers(this);
-              nospecialcharacters(this);
-              noinjectioncharacters(this);
+              namecheck(event.data.value, changeerrorlname);
               props.changeReglname(event.target.value);
             }}
           ></input>
-          <br></br>
-          <br></br>
+          <p>{errorlname}</p>
 
           <label for="email">E-Mail:</label>
           <br></br>
@@ -70,13 +80,11 @@ function REGISTER(props) {
             class="textfield"
             placeholder="example@gmail.com"
             onChange={(event) => {
-              nospecialcharacters(this);
-              noinjectioncharacters(this);
+              emailcheck(this);
               props.changeRegemail(event.target.value);
             }}
           ></input>
-          <br></br>
-          <br></br>
+          <p>{erroremail}</p>
 
           <label for="pword">Password:</label>
           <br></br>
@@ -86,11 +94,10 @@ function REGISTER(props) {
             class="textfield"
             placeholder="Password"
             onChange={(event) => {
-              noinjectioncharacters(this);
+              pwcheck(this);
             }}
           ></input>
-          <br></br>
-          <br></br>
+          <p>{errorpw}</p>
 
           <label for="rpword">Repeat Password:</label>
           <br></br>
@@ -100,11 +107,10 @@ function REGISTER(props) {
             class="textfield"
             placeholder="Repeat Password"
             onChange={(event) => {
-              noinjectioncharacters(this);
+              pwcheck(this);
             }}
           ></input>
-          <br></br>
-          <br></br>
+          <p>{erroremail}</p>
           <br></br>
           <input
             type="button"
