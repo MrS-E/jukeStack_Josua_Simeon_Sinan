@@ -2,38 +2,58 @@ import { BrowserRouter, Link, Route, Switch } from "react-router-dom";
 import reactjs, { useState } from "react";
 import "./css/main.css";
 
-function namecheck(changeerror) {
-  let input = "";
-  let regex = /[^a-zA-Z]+$/;
+function charactercheck(changeerror, input, type) {
+  let regexname = /[^a-zA-Z]/;
+  let regexemail = /^([a-zA-Z0-9_\-\.]+)@([a-zA-Z0-9_\-\.]+)\.([a-zA-Z]{2,5})$/;
+  let regexpw =
+    /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&#])[A-Za-z\d@$!%*?&#]{8,64}$/;
 
-  if (changeerror === "changeerrorfname") {
-    input = document.getElementById("fname");
-  } else if (changeerror === "changeerrorlname") {
-  }
-
-  if (regex.test(input)) {
-    console.log("error");
+  if (regexname.test(input) && type === "name") {
     changeerror("Please enter a valid name");
+  } else if (!regexemail.test(input) && type === "email") {
+    changeerror("Please enter a valid email-adress");
+  } else if (!regexpw.test(input) && type === "pw") {
+    changeerror(
+      "Please enter a password with 8-64 characters upper and lower case letters, numbers and special characters"
+    );
   } else {
     changeerror("");
   }
 }
 
-function emailcheck(input) {
-  var regex = /[^0-9]/gi;
-  input.value = input.value.replace(regex, "");
-}
+function submitcheck(
+  errorfname,
+  errorlname,
+  erroremail,
+  errorpw,
+  errorpwrep,
+  changepage,
+  changeerror
+) {
+  let pw = document.getElementById("pword").value;
+  let pwrep = document.getElementById("rpword").value;
 
-function pwcheck(input) {
-  var regex = /[^0-9]/gi;
-  input.value = input.value.replace(regex, "");
+  if (pw === pwrep) {
+    if (
+      errorfname === "" &&
+      errorlname === "" &&
+      erroremail === "" &&
+      errorpw === "" &&
+      errorpwrep === ""
+    ) {
+      changepage("login");
+    }
+  } else {
+    changeerror("Password doesn't match with first Password");
+  }
 }
 
 function REGISTER(props) {
-  let [errorfname, changeerrorfname] = useState("");
-  let [errorlname, changeerrorlname] = useState("");
-  let [erroremail, changeerroremail] = useState("");
-  let [errorpw, changeerrorpw] = useState("");
+  let [errorfname, changeerrorfname] = useState(" ");
+  let [errorlname, changeerrorlname] = useState(" ");
+  let [erroremail, changeerroremail] = useState(" ");
+  let [errorpw, changeerrorpw] = useState(" ");
+  let [errorpwrep, changeerrorpwrep] = useState(" ");
   return (
     <body>
       <title>Register Form</title>
@@ -52,7 +72,7 @@ function REGISTER(props) {
             class="textfield"
             placeholder="Max"
             onChange={(event) => {
-              namecheck(changeerrorfname);
+              charactercheck(changeerrorfname, event.target.value, "name");
               props.changeRegfname(event.target.value);
             }}
           ></input>
@@ -66,7 +86,7 @@ function REGISTER(props) {
             class="textfield"
             placeholder="Mustermann"
             onChange={(event) => {
-              namecheck(event.data.value, changeerrorlname);
+              charactercheck(changeerrorlname, event.target.value, "name");
               props.changeReglname(event.target.value);
             }}
           ></input>
@@ -80,7 +100,7 @@ function REGISTER(props) {
             class="textfield"
             placeholder="example@gmail.com"
             onChange={(event) => {
-              emailcheck(this);
+              charactercheck(changeerroremail, event.target.value, "email");
               props.changeRegemail(event.target.value);
             }}
           ></input>
@@ -94,7 +114,7 @@ function REGISTER(props) {
             class="textfield"
             placeholder="Password"
             onChange={(event) => {
-              pwcheck(this);
+              charactercheck(changeerrorpw, event.target.value, "pw");
             }}
           ></input>
           <p>{errorpw}</p>
@@ -107,15 +127,32 @@ function REGISTER(props) {
             class="textfield"
             placeholder="Repeat Password"
             onChange={(event) => {
-              pwcheck(this);
+              charactercheck(changeerrorpwrep, event.target.value, "pw");
             }}
           ></input>
-          <p>{erroremail}</p>
+          <p>{errorpwrep}</p>
           <br></br>
           <input
             type="button"
             id="regsub"
             value="Submit!"
+            class="button"
+            onClick={() => {
+              submitcheck(
+                errorfname,
+                errorlname,
+                erroremail,
+                errorpw,
+                errorpwrep,
+                props.changepage,
+                changeerrorpwrep
+              );
+            }}
+          ></input>
+          <input
+            type="button"
+            id="back"
+            value="Back to Login"
             class="button"
             onClick={() => {
               props.changepage("login");
