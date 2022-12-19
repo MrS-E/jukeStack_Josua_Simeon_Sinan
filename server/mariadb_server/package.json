@@ -18,7 +18,6 @@
     "crypto-js": "^4.1.1",
     "express": "^4.18.2",
     "mariadb": "^3.0.2",
-    "mysql": "^2.18.1",
     "node-schedule": "^2.1.0"
   },
   "devDependencies": {
