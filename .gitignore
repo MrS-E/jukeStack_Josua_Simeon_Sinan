@@ -28,3 +28,6 @@ server/node_modules
 
 #password for db
 server/db_key.js
+
+###test-ui
+test-ui/node_modules
