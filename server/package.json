@@ -7,11 +7,8 @@
     "dev": "nodemon index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": [
-    "MrS-E",
-    "Josupe"
-  ],
-  "license": "ISC",
+  "author":  "MrS-E & Josupe",
+  "license": "MIT",
   "dependencies": {
     "cors": "^2.8.5",
     "crypto-js": "^4.1.1",
