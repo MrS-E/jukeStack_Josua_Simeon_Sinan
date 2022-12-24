@@ -1,20 +1,23 @@
 import axios from "axios";
 import React, {useEffect, useRef, useState} from "react";
 import {BrowserRouter, Link, NavLink, Route, Routes} from 'react-router-dom';
+import Main from "./components/main";
+import 'bootstrap/dist/css/bootstrap.min.css'
 
 function App() {
+    const domain = "http://localhost:5000";
     const user_ref = useRef();
     const pwd_ref = useRef();
     const sub_ref = useRef();
 
     const [user, changeUser] = useState("");
     const [passwd, changePasswd] = useState("");
-    const [login, changeLogin] = useState(false)
+    const [login, changeLogin] = useState(true); //TODO (MrS-E) change to false (true just for testing)
 
     const [failed, changeFailed] = useState("");
     useEffect(() => {
         console.log(user, passwd)
-        axios.post("http://localhost:5000/login", {mail: user, password: passwd}).then(
+        axios.post(domain+"/login", {mail: user, password: passwd}).then(
             (res) => {
                 console.log(res);
                 changeLogin(res.data.login);
@@ -24,7 +27,7 @@ function App() {
                 }
             }
         )
-    }, [user, passwd])
+    }, [user, passwd, login])
 
     const handleClick = () => {
         //console.log(user_ref)
@@ -49,7 +52,7 @@ function App() {
     useEffect(() => {
         console.log(regData)
         if(regData.user) {
-            axios.post("http://localhost:5000/register", regData).then(
+            axios.post(domain+"/register", regData).then(
                 (res) => {
                     console.log(res);
                     if (!res.data.register) {
@@ -118,7 +121,7 @@ function App() {
         );
     }else{
         return (
-            <h1>Login successful</h1>
+            <Main user={user} domain={domain}/>
         );
     }
 }

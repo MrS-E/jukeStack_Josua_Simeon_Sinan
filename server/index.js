@@ -25,7 +25,6 @@ db.connect((err) =>{
 app.get("/", (req, res)=>{
     res.send("Server is running")
 })
-
 app.post("/login", (req, res)=>{
     const mail = req.body.mail;
     const password = sha256(req.body.password);
@@ -69,7 +68,6 @@ app.post("/register", (req, res) => {
         }
     );
 });
-
 app.get("/list", (req, res)=>{
     db.query("select * from TNFTSongs",
         (err, result)=>{
@@ -139,6 +137,52 @@ app.get("/return/:id", (req, res)=>{
             }
         });
 });
+app.get("/user/:mail", (req, res)=>{
+    const mail = req.params.mail;
+    db.query("", [mail], (err, result)=>{ //TODO (Joscupe) select all details to user
+        if(err){
+            res.send({user:undefined, error:err});
+        }else{
+            res.send({user:result});
+        }
+    })
+})
+app.post("/admin", (req, res)=>{
+    const user = req.body.admin;
+    const pwd = req.body.pwd;
+    const command = req.body.command;
+    const attr = req.body.attributes;
+    db.query("", [user, pwd], (err, result)=>{ //TODO (Joscupe) select if admin
+        if(result.length===1){
+            console.log("admin verified");
+            res.send({admin: true});
+            const query = {
+                sql: undefined,
+                values: []
+            }
+            switch(command){
+                case "all_user":
+                    query.sql = ""; //TODO (Joscupe) select * users
+                    break;
+                case "user":
+                    query.sql = ""; //TODO (Joscupe) select user with mail
+                    query.values = [attr.mail];
+                    break;
+                case "lending":
+                    query.sql = ""; //TODO (Joscupe) select everything from lending
+                    break;
+                case "remove_lend":
+                    query.sql = ""; //TODO (Joscupe) remove lending at id
+                    query.values = [attr.lenId];
+                    break;
+                default: res.status(501).send("command unknown")
+            }
+            query.sql!==undefined ? db.query(query.sql, query.values, (err, result)=> {err ? res.sendStatus(503).send({result:undefined, error: err}) : res.send({result:result})}) : res.sendStatus(503).send({result: undefined, error:"db error, no connection"});
+        }else{
+            res.sendStatus(418).send({admin: false, error:"Pls, send admin verification."})
+        }
+    })
+})
 schedule.scheduleJob('0 0 * * *', ()=>{ //runs every 24h at 0:0 // when is a lending expired? extra function!
     db.query("", //TODO (Joscupe) select all lendings which have expired or which have no end date (would be nice if start date = 5 days in the past (if not additions are needed by (MrS-E)))
         (err, result)=>{
@@ -158,41 +202,6 @@ schedule.scheduleJob('0 0 * * *', ()=>{ //runs every 24h at 0:0 // when is a len
         });
 });
 
-app.post("/admin", (req, res)=>{
-    const user = req.body.admin;
-    const pwd = req.body.pwd;
-    const command = req.body.command;
-    const attr = req.body.attributes;
-    db.query("", [user, pwd], (err, result)=>{ //TODO (Joscupe) select if admin
-       if(result.length===1){
-           console.log("admin verified");
-           const query = {
-                sql: undefined,
-                values: []
-           }
-           switch(command){
-               case "all_user":
-                   query.sql = ""; //TODO (Joscupe) select * users
-                   break;
-               case "user":
-                   query.sql = ""; //TODO (Joscupe) select user with mail
-                   query.values = [attr.mail];
-                   break;
-               case "lending":
-                   query.sql = ""; //TODO (Joscupe) select everything from lending
-                   break;
-               case "remove_lend":
-                   query.sql = ""; //TODO (Joscupe) remove lending at id
-                   query.values = [attr.lenId];
-                   break;
-               default: res.status(501).send("command unknown")
-           }
-           query.sql!==undefined ? db.query(query.sql, query.values, (err, result)=> {err ? res.sendStatus(503).send({result:undefined, error: err}) : res.send({result:result})}) : res.sendStatus(503).send({result: undefined, error:"db error, no connection"});
-       }else{
-           res.sendStatus(418).send("Pls, send admin verification.")
-       }
-    })
-})
-app.listen(require("./variables").PORT, () => {
-    console.log("Server started at port "+ require("./variables").PORT);
+app.listen(process.env.PORT||require("./variables").PORT, () => {
+    console.log("Server started at port "+ process.env.PORT || require("./variables").PORT);
 });
