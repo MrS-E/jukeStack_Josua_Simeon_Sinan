@@ -166,10 +166,30 @@ app.post("/admin", (req, res)=>{
     db.query("", [user, pwd], (err, result)=>{ //TODO (Joscupe) select if admin
        if(result.length===1){
            console.log("admin verified");
-           switch(command){
-               case "": break;
-               default: res.status(100).send("command unknown");
+           const query = {
+                sql: undefined,
+                values: []
            }
+           switch(command){
+               case "all_user":
+                   query.sql = ""; //TODO (Joscupe) select * users
+                   break;
+               case "user":
+                   query.sql = ""; //TODO (Joscupe) select user with mail
+                   query.values = [attr.mail];
+                   break;
+               case "lending":
+                   query.sql = ""; //TODO (Joscupe) select everything from lending
+                   break;
+               case "remove_lend":
+                   query.sql = ""; //TODO (Joscupe) remove lending at id
+                   query.values = [attr.lenId];
+                   break;
+               default: res.status(501).send("command unknown")
+           }
+           query.sql!==undefined ? db.query(query.sql, query.values, (err, result)=> {err ? res.sendStatus(503).send({result:undefined, error: err}) : res.send({result:result})}) : res.sendStatus(503).send({result: undefined, error:"db error, no connection"});
+       }else{
+           res.sendStatus(418).send("Pls, send admin verification.")
        }
     })
 })
