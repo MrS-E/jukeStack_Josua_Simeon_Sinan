@@ -21,10 +21,13 @@ function App() { //TESTED
         if (noRender){
             axios.post(domain + "/login", {mail: user, password: passwd}).then(
                 (res) => {
-                    console.log(res);
                     changeLogin(res.data.login);
                     if (!res.data.login) {
-                        changeFailed("Wrong password or e-mail.");
+                        if (res.data.message){
+                            changeFailed(res.data.message);
+                        }else{
+                            changeFailed("Wrong password or email.")
+                        }
                         sub_ref.current.removeAttribute("disabled");
                     }
                 })
@@ -34,7 +37,6 @@ function App() { //TESTED
     }, [user, passwd, login, noRender])
 
     const handleClick = () => {
-        console.log("login")
         sub_ref.current.setAttribute("disabled", true)
         changeFailed("");
         changeUser(user_ref.current.value);
@@ -55,7 +57,6 @@ function App() { //TESTED
     }
 
     const handleClick_register = () =>{
-        console.log("register");
         changeRegFail("");
         sub_reg_ref.current.setAttribute("disabled", true);
         axios.post(domain+"/register", {
@@ -66,8 +67,6 @@ function App() { //TESTED
             password: pwd_reg_ref.current.value //TODO evtl. hash before server...
         })
             .then((res) => {
-                console.log("send");
-                console.log(res);
                 if (!res.data.register) {
                     changeRegFail("Pls try again!");
                     sub_reg_ref.current.removeAttribute("disabled");

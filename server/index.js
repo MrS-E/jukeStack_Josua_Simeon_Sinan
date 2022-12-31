@@ -40,10 +40,10 @@ app.post("/login", (req, res)=>{
                     if(password===result[0].UsPasswd){
                         res.send({login:true, user: mail, error: null})
                     }else{
-                        res.send({login:false, error: "wrong password"})
+                        res.send({login:false,error: null, message: "wrong password"})
                     }
                 }else{
-                    res.send({login:false, error: "user not found"});
+                    res.send({login:false,error: null, message: "user not found"});
                 }
             }
         });
