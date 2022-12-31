@@ -27,19 +27,20 @@ app.get("/", (req, res)=>{
 })
 app.post("/login", (req, res)=>{
     const mail = req.body.mail;
-    const password = sha256(req.body.password);
+    const password = sha256(req.body.password).toString();
     db.query("select UsPasswd from TUsers where UsMail = (?)", //select user which has the password
         [mail],
         (err, result) => {
             if(err){
-                console.log("login:",err)
+                console.log("login", Date.now(), ":", err)
                 res.send({login:false, error: err})
             }else{
                 if(result.length===1){
-                    if(password===result[0]){
-                        result.send({login:true, user: mail, error: null})
+                    console.log(result);
+                    if(password===result[0].UsPasswd){
+                        res.send({login:true, user: mail, error: null})
                     }else{
-                        result.send({login:false, error: "wrong password"})
+                        res.send({login:false, error: "wrong password"})
                     }
                 }else{
                     res.send({login:false, error: "user not found"});
@@ -47,20 +48,17 @@ app.post("/login", (req, res)=>{
             }
         });
 });
-app.post("/register", (req, res) => {
-    console.log("register")
-    //console.log(req);
+app.post("/register", (req, res) => { //TESTED
     const mail = req.body.mail;
     const salutation = req.body.salutation;
     const first = req.body.firstName;
     const last = req.body.lastName;
-    const password = sha256(req.body.password);
-    //console.log(req.body.password);
-    db.query("insert into TUsers values(?,?,?,?,?)",
+    const password = sha256(req.body.password).toString();
+    db.query("insert into TUsers (UsMail, UsSalutation, UsFName, UsSName, UsPasswd) values(?,?,?,?,?)",
         [mail, salutation,first,last,password],
         (err) => {
             if (err) {
-                console.log(err);
+                console.log("register:", Date.now(), ":",err);
                 res.send({register:false, error:err})
             } else {
                 res.send({register:true});
@@ -203,5 +201,5 @@ schedule.scheduleJob('0 0 * * *', ()=>{ //runs every 24h at 0:0 // when is a len
 });
 
 app.listen(process.env.PORT||require("./variables").PORT, () => {
-    console.log("Server started at port "+ process.env.PORT || require("./variables").PORT);
+    console.log("Server started at port "+ process.env.PORT+ " oder "+ require("./variables").PORT);
 });
