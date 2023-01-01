@@ -99,14 +99,14 @@ function App() { //TESTED
                                         <div className="form-group mt-3">
                                             <label>Salutation</label><br/>
                                             <input
-                                                name={"sal"}
-                                                type={"radio"}
+                                                name="sal"
+                                                type="radio"
                                                 className="form-check-input mt-1"                                            checked={salu === "Sir"}
                                                 onChange={()=>onOptionChange("Sir")}/>
                                             <span>Sir</span><br/>
                                             <input
-                                                name={"sal"}
-                                                type={"radio"}
+                                                name="sal"
+                                                type="radio"
                                                 className="form-check-input mt-1"                                            checked={salu === "Madam"}
                                                 onChange={()=>onOptionChange("Madam")}/>
                                             <span>Madam</span><br/>

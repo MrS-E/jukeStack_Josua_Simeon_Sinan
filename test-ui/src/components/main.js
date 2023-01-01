@@ -28,7 +28,7 @@ function Main(props) {
                         <Route path='/nft' element={<Nft user={props.user} domain={props.domain}/>}/>
                         <Route exact path='/' element={<Home user={props.user} domain={props.domain}/>}/>
                         <Route path='*' element={
-                           <div>
+                           <div className="row">
                                <h1>404 Not Found</h1>
                                <p>Please use only the official webpages</p>
                            </div>

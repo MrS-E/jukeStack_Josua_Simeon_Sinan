@@ -104,8 +104,8 @@ app.post("/lend", (req, res)=>{
             }
         })
 });
-app.get("/lendings/:user", (req, res)=>{
-    const userMail = req.params.user;
+app.get("/lendings", (req, res)=>{
+    const userMail = req.query.user;
     db.query("select distinct UsFName, USSName, NFName, NFInterpret, NFLength, NFYear, LenStart from TUsers natural join TLendings l natural join TNFTSongs where l.UsMail = (?);",
         [userMail],
         (err, result)=>{
@@ -122,8 +122,8 @@ app.get("/lendings/:user", (req, res)=>{
         }
     );
 });
-app.get("/return/:id", (req, res)=>{
-    const LenID = req.params.id;
+app.get("/return", (req, res)=>{
+    const LenID = req.query.id;
     db.query("update TLendings set LenEnd = now() where LenId = (?);",
         [/*user,NFToken,*/LenID],
         (err)=>{
@@ -135,7 +135,7 @@ app.get("/return/:id", (req, res)=>{
             }
         });
 });
-app.get("/user", (req, res)=>{
+app.get("/user", (req, res)=>{ //TESTED
     const mail = req.query.mail;
     db.query("select UsMail, UsSalutation, UsFName, UsSName from TUsers where UsMail=(?)", [mail], (err, result)=>{ //TODO (Joscupe) select all details to user
         if(err){
@@ -153,7 +153,7 @@ app.get("/user", (req, res)=>{
             }
         }
     })
-})
+}) //TESTED
 app.post("/admin", (req, res)=>{
     const user = req.body.admin;
     const pwd = req.body.pwd;
@@ -190,6 +190,24 @@ app.post("/admin", (req, res)=>{
         }
     })
 })
+app.post("/update", (req, res)=>{ //TESTED
+    const user = req.body.user;
+    const pwd_old = sha256(req.body.pwd_old).toString();
+    const pwd_new = sha256(req.body.pwd_new).toString();
+    const mail = req.body.mail_new;
+    db.query("update TUsers set UsMail=(?), UsPasswd=(?) where UsMail=(?) and UsPasswd=(?)",
+        [mail, pwd_new,user,pwd_old],
+        (err, result) => {
+            console.log(result)
+            if (err) {
+                console.log("update:", Date.now(), ":",err);
+                res.send({update:false, error:err})
+            } else {
+                res.send({update:true, result: result});
+            }
+        }
+    );
+}) //TESTED
 schedule.scheduleJob('0 0 * * *', ()=>{ //runs every 24h at 0:0 // when is a lending expired? extra function!
     db.query("", //TODO (Joscupe) select all lendings which have expired or which have no end date (would be nice if start date = 5 days in the past (if not additions are needed by (MrS-E)))
         (err, result)=>{

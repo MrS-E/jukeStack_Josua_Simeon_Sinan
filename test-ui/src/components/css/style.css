@@ -1,12 +1,3 @@
-/*user.js*/
-.userName{
-    display: flex;
-    justify-content: left;
-}
-.userName div{
-    display: block;
-}
-
 /*popup.js*/
 .popup {
     position: fixed;
