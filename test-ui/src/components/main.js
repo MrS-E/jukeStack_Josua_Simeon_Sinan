@@ -6,6 +6,7 @@ import Nft from "./nft/nft";
 import Home from "./home/home";
 
 function Main(props) {
+    console.log(props.domain)
     return (
         <div>
             <BrowserRouter>
@@ -26,6 +27,12 @@ function Main(props) {
                         <Route path='/user' element={<User user={props.user} domain={props.domain}/>}/>
                         <Route path='/nft' element={<Nft user={props.user} domain={props.domain}/>}/>
                         <Route exact path='/' element={<Home user={props.user} domain={props.domain}/>}/>
+                        <Route path='*' element={
+                           <div>
+                               <h1>404 Not Found</h1>
+                               <p>Please use only the official webpages</p>
+                           </div>
+                        }/>
                     </Routes>
                 </div>
             </BrowserRouter>

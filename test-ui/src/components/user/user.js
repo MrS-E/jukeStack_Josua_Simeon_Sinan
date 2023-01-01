@@ -6,7 +6,10 @@ function User(props) {
     const user = props.user
     const domain = props.domain;
     const [trigger, changeTrigger] = useState(true);
-    const {data, loading, error} = useGet(domain+"/user/?"+user);
+    console.log(props.domain)
+    const {data, loading, error} = useGet(domain+"/user/?mail="+user);
+
+    if(error) console.log(error);
 
     const handleChangePasswd = () =>{
         changeTrigger(true);
@@ -22,25 +25,25 @@ function User(props) {
                 <h1>User</h1>
                 <div className={"userName"}>
                     <div>
-                        <h3> </h3>
-                        <p>{data.UsSalutation}</p>
+                        <h3>Salutaion</h3>
+                        <p>{data.user.UsSalutation}</p>
                     </div>
                     <div>
                         <h3>First Name</h3>
-                        <p>{data.UsFName}</p>
+                        <p>{data.user.UsFName}</p>
                     </div>
                     <div>
                         <h3>Surname</h3>
-                        <p>{data.UsSName}</p>
+                        <p>{data.user.UsSName}</p>
                     </div>
                 </div>
                 <div>
                     <h3>Mail</h3>
-                    <p>{data.UsMail}</p>
+                    <p>{data.user.UsMail}</p>
                 </div>
                 <div>
                     <button onClick={handleChangePasswd}>Change Password</button>
-                    <button onClick={handleChangePasswd}>Change E-Mail</button>
+                    <button onClick={handleChangeMail}>Change E-Mail</button>
                 </div>
                 <div>
                     <Popup trigger={trigger} changeTrigger={changeTrigger}>

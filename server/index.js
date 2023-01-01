@@ -24,7 +24,7 @@ db.connect((err) =>{
 
 app.get("/", (req, res)=>{
     res.send("Server is running")
-})
+}) //TESTED
 app.post("/login", (req, res)=>{
     const mail = req.body.mail;
     const password = sha256(req.body.password).toString();
@@ -47,7 +47,7 @@ app.post("/login", (req, res)=>{
                 }
             }
         });
-});
+}); //TESTED
 app.post("/register", (req, res) => { //TESTED
     const mail = req.body.mail;
     const salutation = req.body.salutation;
@@ -65,7 +65,7 @@ app.post("/register", (req, res) => { //TESTED
             }
         }
     );
-});
+}); //TESTED
 app.get("/list", (req, res)=>{
     db.query("select * from TNFTSongs",
         (err, result)=>{
@@ -135,13 +135,19 @@ app.get("/return/:id", (req, res)=>{
             }
         });
 });
-app.get("/user/:mail", (req, res)=>{
-    const mail = req.params.mail;
-    db.query("", [mail], (err, result)=>{ //TODO (Joscupe) select all details to user
+app.get("/user", (req, res)=>{
+    const mail = req.query.mail;
+    db.query("select UsMail, UsSalutation, UsFName, UsSName from TUsers where UsMail=(?)", [mail], (err, result)=>{ //TODO (Joscupe) select all details to user
         if(err){
             res.send({user:undefined, error:err});
         }else{
-            res.send({user:result});
+            if(result[0].UsMail&&result[0].UsSalutation&&result[0].UsFName&&result[0].UsSName) {
+                res.send({user: {
+                    mail: result[0].UsMail
+                    }});
+            }else{
+                res.send({user: undefined, error:"Something strange"});
+            }
         }
     })
 })
