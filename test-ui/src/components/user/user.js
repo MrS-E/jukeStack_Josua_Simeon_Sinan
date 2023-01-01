@@ -8,7 +8,7 @@ function User(props) {
     const domain = props.domain;
     const [trigger, changeTrigger] = useState(false);
     const [form, changeForm] = useState();
-    const {data, loading} = useGet(domain+"/user/?mail="+user);
+    const {data, loading} = useGet(domain+"/user/?user="+user);
     const pwd_old=useRef(null);
     const mail_new=useRef(null);
     const pwd_new=useRef(null);

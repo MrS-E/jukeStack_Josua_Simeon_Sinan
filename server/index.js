@@ -106,17 +106,17 @@ app.post("/lend", (req, res)=>{
 });
 app.get("/lendings", (req, res)=>{
     const userMail = req.query.user;
-    db.query("select distinct UsFName, USSName, NFName, NFInterpret, NFLength, NFYear, LenStart from TUsers natural join TLendings l natural join TNFTSongs where l.UsMail = (?);",
+    db.query("select distinct UsFName, USSName, NFName, NFInterpret, NFLength, NFYear, concat(date_format(LenStart, '%d %M %Y'),' ', time_format(LenStart, '%H:%i:%s')) as LenDate from TUsers natural join TLendings l natural join TNFTSongs where l.UsMail = (?) and LenEnd is null;",
         [userMail],
         (err, result)=>{
             if(err){
                 console.log("lendings:",err);
-                res.send({lending:undefined, error:err});
+                res.send({lending:[], error:err});
             }else{
                 if(result.length>0) {
                     res.send({lending: result});
                 }else{
-                    res.send({lending:null, error:"user has nothing rented"})
+                    res.send({lending:[], error:"user has nothing rented"})
                 }
             }
         }
@@ -136,7 +136,7 @@ app.get("/return", (req, res)=>{
         });
 });
 app.get("/user", (req, res)=>{ //TESTED
-    const mail = req.query.mail;
+    const mail = req.query.user;
     db.query("select UsMail, UsSalutation, UsFName, UsSName from TUsers where UsMail=(?)", [mail], (err, result)=>{ //TODO (Joscupe) select all details to user
         if(err){
             res.send({user:undefined, error:err});
