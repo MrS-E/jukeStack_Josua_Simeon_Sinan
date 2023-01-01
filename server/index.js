@@ -143,7 +143,10 @@ app.get("/user", (req, res)=>{
         }else{
             if(result[0].UsMail&&result[0].UsSalutation&&result[0].UsFName&&result[0].UsSName) {
                 res.send({user: {
-                    mail: result[0].UsMail
+                    mail: result[0].UsMail,
+                    salutation: result[0].UsSalutation,
+                    fname: result[0].UsFName,
+                    lname: result[0].UsSName
                     }});
             }else{
                 res.send({user: undefined, error:"Something strange"});
