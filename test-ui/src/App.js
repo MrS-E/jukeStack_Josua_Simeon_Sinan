@@ -97,7 +97,8 @@ function App() {
                                     <p>password</p>
                                     <input ref={pwd_reg_ref} type={"password"}/>
                                     {failed}
-                                    <button ref={sub_reg_ref} onClick={handleClick_register}>login</button>
+
+                                    <button ref={sub_reg_ref} onClick={handleClick_register}>Register</button>
                                 </div>
                             }/>
                             <Route path='/' element={
