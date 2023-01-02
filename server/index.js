@@ -158,6 +158,22 @@ schedule.scheduleJob('0 0 * * *', ()=>{ //runs every 24h at 0:0 // when is a len
             }
         });
 });
+
+app.post("/admin", (req, res)=>{
+    const user = req.body.admin;
+    const pwd = req.body.pwd;
+    const command = req.body.command;
+    const attr = req.body.attributes;
+    db.query("", [user, pwd], (err, result)=>{ //TODO (Joscupe) select if admin
+       if(result.length===1){
+           console.log("admin verified");
+           switch(command){
+               case "": break;
+               default: res.status(100).send("command unknown");
+           }
+       }
+    })
+})
 app.listen(require("./variables").PORT, () => {
     console.log("Server started at port "+ require("./variables").PORT);
 });
