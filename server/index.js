@@ -18,7 +18,7 @@ db.connect((err) =>{
     if (err){
         console.log(err)
     } else {
-        console.log("Connected!");
+        console.log("Connected to DB!");
     }
 });
 
@@ -57,7 +57,7 @@ app.post("/register", (req, res) => {
     const last = req.body.lastName;
     const password = sha256(req.body.password);
     //console.log(req.body.password);
-    db.query("insert into TUsers values(?,?,?,?,?)",
+    db.query("insert into TUsers values(?,?,?,?,?,'user')", // To add an admin you have to do it in the DB directly
         [mail, salutation,first,last,password],
         (err) => {
             if (err) {
@@ -65,6 +65,7 @@ app.post("/register", (req, res) => {
                 res.send({register:false, error:err})
             } else {
                 res.send({register:true});
+                console.log("User added")
             }
         }
     );
