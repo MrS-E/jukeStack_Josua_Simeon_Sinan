@@ -23,7 +23,7 @@ create  table TUsers (
     UsFName varchar(45) not null,
     UsSName varchar(45) not null,
     UsPasswd char(64) not null,
-    UsRole enum('user','admin') not null
+    UsRole enum('user','admin') not null default('user')
 );
 -- Table TLendings
 drop table if exists TLendings;
