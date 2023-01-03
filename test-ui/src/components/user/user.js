@@ -1,39 +1,45 @@
 import React, {useRef, useState} from 'react';
 import Popup from "../popup";
-import useGet from "../../hook/useGet";
 import axios from "axios";
+import usePost from "../../hook/usePost";
+import {useCookies} from "react-cookie";
 
 function User(props) {
-    const user = props.user
     const domain = props.domain;
+    const [cookies, setCookie] = useCookies(['user']);
     const [trigger, changeTrigger] = useState(false);
     const [form, changeForm] = useState();
-    const {data, loading} = useGet(domain+"/user/?user="+user);
+    const {data, loading} = usePost(domain+"/user", {user: cookies.name, pwd:cookies.pwd})
     const pwd_old=useRef(null);
     const mail_new=useRef(null);
     const pwd_new=useRef(null);
 
     const changeMail=()=>{
         axios.post(domain+"/update",{
-            user: user,
+            user: cookies.name,
             pwd_old: pwd_old.current.value,
             pwd_new: pwd_old.current.value,
             mail_new: mail_new.current.value
         }).then((res)=>{
             if(res.data.result.affectedRows<1){
                 alert("Something happened that shouldn't happen, nothing was changed. Please check the entered password.")
+            }else{
+                setCookie('name', mail_new.current.value, { path: '/' });
             }
         })
     }
     const changePwd=()=>{
         axios.post(domain+"/update",{
-            user: user,
+            user: cookies.name,
             pwd_old: pwd_old.current.value,
             pwd_new: pwd_new.current.value,
-            mail_new: user
+            mail_new: cookies.name
         }).then((res)=>{
             if(res.data.result.affectedRows<1){
                 alert("Something happened that shouldn't happen, nothing was changed. Please check the entered password.")
+            } else{
+                setCookie('pwd', pwd_new.current.value, { path: '/' });
+
             }
         })
     }

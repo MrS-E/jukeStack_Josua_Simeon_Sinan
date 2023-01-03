@@ -1,19 +1,18 @@
 import React from 'react';
-import useGet from "../../hook/useGet";
+import usePost from "../../hook/usePost";
+import {useCookies} from "react-cookie";
 
 function Home(props) {
-    const user = props.user;
+    const [cookies, setCookie] = useCookies(['user']);
     const domain = props.domain;
-    const {data, loading} = useGet(domain+"/lendings/?user="+user);
-    if(data) console.log(data);
-
+    const {data, loading} = usePost(domain+"/lendings", {user: cookies.name, pwd:cookies.pwd})
     if(data){
         return (
             <div>
                 <h1>Home</h1>
                 <div className="row mt-4">
                     <h3>Signed in as user:</h3>
-                    <p><strong>{user}</strong></p>
+                    <p><strong>{cookies.name}</strong></p>
                 </div>
                 <div className="row mt-4">
                     <h3>Currently on lending</h3>

@@ -4,8 +4,10 @@ import {BrowserRouter, Link, Route, Routes} from "react-router-dom";
 import {Nav, Navbar, NavLink} from "react-bootstrap";
 import Main from "./components/main";
 import 'bootstrap/dist/css/bootstrap.min.css';
+import { useCookies } from 'react-cookie';
 
 function App() { //TESTED
+    const [cookies, setCookie] = useCookies(['user']);
     const domain = "http://localhost:5000";
     const user_ref = useRef(null);
     const pwd_ref = useRef(null);
@@ -13,15 +15,17 @@ function App() { //TESTED
 
     const [noRender, changeNoRender] = useState(false);
     const [user, changeUser] = useState("");
-    const [passwd, changePasswd] = useState(""); //TODO evtl. hash before server...
+    const [passwd, changePasswd] = useState("");
     const [login, changeLogin] = useState(false);
     const [failed, changeFailed] = useState("");
+    const [admin, changeAdmin] = useState(false);
 
     useEffect(() => {
         if (noRender){
             axios.post(domain + "/login", {mail: user, password: passwd}).then(
                 (res) => {
                     changeLogin(res.data.login);
+                    changeAdmin(res.data.admin);
                     if (!res.data.login) {
                         if (res.data.message){
                             changeFailed(res.data.message);
@@ -29,12 +33,15 @@ function App() { //TESTED
                             changeFailed("Wrong password or email.")
                         }
                         sub_ref.current.removeAttribute("disabled");
+                    }else{
+                        setCookie('name', user, { path: '/' });
+                        setCookie('pwd', passwd, { path: '/' });
                     }
                 })
                 .catch();
             changeNoRender(false);
         }
-    }, [user, passwd, login, noRender])
+    }, [user, passwd, login])
 
     const handleClick = () => {
         sub_ref.current.setAttribute("disabled", true)
@@ -70,11 +77,12 @@ function App() { //TESTED
                 if (!res.data.register) {
                     changeRegFail("Pls try again!");
                     sub_reg_ref.current.removeAttribute("disabled");
+                }else{
+                   window.location.href=window.location.href.replace("register","");
                 }
             })
             .catch();
     }
-
     if (!login) { //TESTED
         return (
             <div>
@@ -160,7 +168,7 @@ function App() { //TESTED
                                     </div>
                                 </div>
                             }/>
-                            <Route path='*' element={ /*TODO auto login with browser storage*/
+                            <Route path='*' element={
                                 <div className="Auth-form-container container">
                                     <div className="Auth-form-content">
                                         <h3 className="Auth-form-title">Sign In</h3>
@@ -189,7 +197,7 @@ function App() { //TESTED
                                         </div>
                                         <span className="text-right text-danger mt-2">{failed}</span>
                                         <p className="forgot-password text-right mt-2">
-                                            Forgot <a href="#">password?</a>
+                                            Forgot <a href="#">password?</a> {/*TODO forget password*/}
                                         </p>
                                     </div>
                                 </div>
@@ -202,7 +210,7 @@ function App() { //TESTED
     }
     else{
         return (
-            <Main user={user} domain={domain}/>
+            <Main user={user} domain={domain} admin={admin}/>
         );
     }
 }

@@ -3,6 +3,7 @@ const express = require("express");
 const mysql = require("mysql2"); //mysql2 because with mysql I have the error: 'ER_NOT_SUPPORTED_AUTH_MODE'
 const schedule = require('node-schedule');
 const cors = require("cors");
+const axios = require("axios")
 
 const app = express();
 app.use(cors());
@@ -36,9 +37,12 @@ app.post("/login", (req, res)=>{
                 res.send({login:false, error: err})
             }else{
                 if(result.length===1){
-                    console.log(result);
                     if(password===result[0].UsPasswd){
-                        res.send({login:true, user: mail, error: null})
+                        if(result[0].UsRole==="admin") {
+                            res.send({login: true, admin: true, user: mail, error: null})
+                        }else {
+                            res.send({login: true, admin: false, user: mail, error: null})
+                        }
                     }else{
                         res.send({login:false,error: null, message: "wrong password"})
                     }
@@ -80,48 +84,60 @@ app.get("/list", (req, res)=>{
 app.post("/lend", (req, res)=>{
     const token = req.body.NFToken;
     const userMail = req.body.mail;
-    db.query("select count(*) from TLendings where UsMail = '(?)' and LenEnd is null;",
-        [userMail],
-        (err, result)=>{
-            if(err){
-                console.log("lend (select):", err)
-                res.send({lend:false, error: err})
-            }else{
-                if(result.length<5){
-                    db.query("insert into TLandings(LenStart, NFToken, UsMail) values(now(), ?,?) ",
-                        [token, userMail],
-                        (err) => {
-                            if(err){
-                                console.log("lend (insert):", err);
-                                res.send({lend:false, error:err})
-                            }else{
-                                res.send({lend: true})
-                            }
-                        });
-                }else{
-                    res.send({lend:false, error:"user "+userMail+" has to many outstanding Lendings"})
-                }
-            }
-        })
-});
-app.get("/lendings", (req, res)=>{
-    const userMail = req.query.user;
-    db.query("select distinct UsFName, USSName, NFName, NFInterpret, NFLength, NFYear, concat(date_format(LenStart, '%d %M %Y'),' ', time_format(LenStart, '%H:%i:%s')) as LenDate from TUsers natural join TLendings l natural join TNFTSongs where l.UsMail = (?) and LenEnd is null;",
-        [userMail],
-        (err, result)=>{
-            if(err){
-                console.log("lendings:",err);
-                res.send({lending:[], error:err});
-            }else{
-                if(result.length>0) {
-                    res.send({lending: result});
-                }else{
-                    res.send({lending:[], error:"user has nothing rented"})
-                }
-            }
+    const userPwd = req.body.pwd;
+    axios.post(domain+"/login", {mail:userMail, password:userPwd}).then((response)=>{
+        if(response.data.login){
+            db.query("select count(*) as many from TLendings where UsMail = (?) and LenEnd is null;",
+                [userMail],
+                (err, result)=>{
+                    if(err){
+                        console.log("lend (select):", err)
+                        res.send({lend:false, error: err})
+                    }else{
+                        if(result[0].many<5){
+                            db.query("insert into TLendings(LenStart, NFToken, UsMail) values(now(), ?,?) ",
+                                [token, userMail],
+                                (err) => {
+                                    if(err){
+                                        console.log("lend (insert):", err);
+                                        res.send({lend:false, error:err})
+                                    }else{
+                                        res.send({lend: true})
+                                    }
+                                });
+                        }else{
+                            res.send({lend:false, message:"User "+userMail+" has to many outstanding NFTs rents"})
+                        }
+                    }
+                })
+        }else{
+            res.send({lend:false, error:"not authorized"})
         }
-    );
+    })
 });
+app.post("/lendings", (req, res)=>{ //TESTED
+    const userMail = req.body.user;
+    const userPwd = req.body.pwd;
+    axios.post(domain+"/login", {mail:userMail, password:userPwd}).then((response)=>{
+        if(response.data.login) {
+            db.query("select distinct UsFName, USSName, NFName, NFInterpret, NFLength, NFYear, concat(date_format(LenStart, '%d %M %Y'),' ', time_format(LenStart, '%H:%i:%s')) as LenDate from TUsers natural join TLendings l natural join TNFTSongs where l.UsMail = (?) and LenEnd is null;",
+                [userMail],
+                (err, result) => {
+                    if (err) {
+                        console.log("lendings:", err);
+                        res.send({lending: [], error: err});
+                    } else {
+                        if (result.length > 0) {
+                            res.send({lending: result});
+                        } else {
+                            res.send({lending: [], error: "user has nothing rented"})
+                        }
+                    }
+                }
+            );
+        }
+    })
+}); //TESTED
 app.get("/return", (req, res)=>{
     const LenID = req.query.id;
     db.query("update TLendings set LenEnd = now() where LenId = (?);",
@@ -135,22 +151,29 @@ app.get("/return", (req, res)=>{
             }
         });
 });
-app.get("/user", (req, res)=>{ //TESTED
-    const mail = req.query.user;
-    db.query("select UsMail, UsSalutation, UsFName, UsSName from TUsers where UsMail=(?)", [mail], (err, result)=>{ //TODO (Joscupe) select all details to user
-        if(err){
-            res.send({user:undefined, error:err});
-        }else{
-            if(result[0].UsMail&&result[0].UsSalutation&&result[0].UsFName&&result[0].UsSName) {
-                res.send({user: {
-                    mail: result[0].UsMail,
-                    salutation: result[0].UsSalutation,
-                    fname: result[0].UsFName,
-                    lname: result[0].UsSName
-                    }});
-            }else{
-                res.send({user: undefined, error:"Something strange"});
-            }
+app.post("/user", (req, res)=>{ //TESTED
+    const mail = req.body.user;
+    const pwd = req.body.pwd
+    axios.post(domain+"/login", {mail:mail, password:pwd}).then((response)=> {
+        if (response.data.login) {
+            db.query("select UsMail, UsSalutation, UsFName, UsSName from TUsers where UsMail=(?)", [mail], (err, result) => {
+                if (err) {
+                    res.send({user: undefined, error: err});
+                } else {
+                    if (result[0].UsMail && result[0].UsSalutation && result[0].UsFName && result[0].UsSName) {
+                        res.send({
+                            user: {
+                                mail: result[0].UsMail,
+                                salutation: result[0].UsSalutation,
+                                fname: result[0].UsFName,
+                                lname: result[0].UsSName
+                            }
+                        });
+                    } else {
+                        res.send({user: undefined, error: "Something strange"});
+                    }
+                }
+            })
         }
     })
 }) //TESTED
@@ -227,6 +250,8 @@ schedule.scheduleJob('0 0 * * *', ()=>{ //runs every 24h at 0:0 // when is a len
         });
 });
 
-app.listen(process.env.PORT||require("./variables").PORT, () => {
-    console.log("Server started at port "+ process.env.PORT+ " oder "+ require("./variables").PORT);
+const listener = app.listen(process.env.PORT||require("./variables").PORT, () => {
+    console.log("Server started at port " + listener.address().port);
 });
+
+const domain = "http://localhost:"+listener.address().port;
