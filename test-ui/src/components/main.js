@@ -4,6 +4,7 @@ import {Nav, Navbar, NavLink} from "react-bootstrap";
 import User from "./user/user";
 import Nft from "./nft/nft";
 import Home from "./home/home";
+import Admin from "./admin/admin";
 
 function Main(props) {
     const [navlink, changeNavlink] = useState("");
@@ -29,8 +30,8 @@ function Main(props) {
                 <div className="container">
                     <Routes>
                         <Route path='/user' element={<User domain={props.domain}/>}/>
-                        <Route path='/nft' element={<Nft user={props.user} domain={props.domain}/>}/>
-                        <Route path='/admin' element={<div>Not an Admin</div>}/>
+                        <Route path='/nft' element={<Nft domain={props.domain}/>}/>
+                        <Route path='/admin' element={<Admin domain={props.domain}/>}/>
                         <Route exact path='/' element={<Home domain={props.domain}/>}/>
                         <Route path='*' element={
                            <div className="row">

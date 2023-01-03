@@ -70,7 +70,7 @@ app.post("/register", (req, res) => { //TESTED
         }
     );
 }); //TESTED
-app.post("/history", (req, res)=> {
+app.post("/history", (req, res)=> { //TESTED
     const mail = req.body.mail;
     const pwd = req.body.pwd;
     axios.post(domain + "/login", {mail: mail, password: pwd}).then((response) => {
@@ -93,7 +93,7 @@ app.post("/history", (req, res)=> {
             res.send({history: [], error: "Something went wrong"})
         }
     })
-})
+}) //TESTED
 app.get("/list", (req, res)=>{ //TESTED
     db.query("select * from TNFTSongs",
         (err, result)=>{
@@ -210,42 +210,6 @@ app.post("/user", (req, res)=>{ //TESTED
         }
     })
 }) //TESTED
-app.post("/admin", (req, res)=>{
-    const user = req.body.admin;
-    const pwd = req.body.pwd;
-    const command = req.body.command;
-    const attr = req.body.attributes;
-    db.query("", [user, pwd], (err, result)=>{ //TODO (Joscupe) select if admin
-        if(result.length===1){
-            console.log("admin verified");
-            res.send({admin: true});
-            const query = {
-                sql: undefined,
-                values: []
-            }
-            switch(command){
-                case "all_user":
-                    query.sql = ""; //TODO (Joscupe) select * users
-                    break;
-                case "user":
-                    query.sql = ""; //TODO (Joscupe) select user with mail
-                    query.values = [attr.mail];
-                    break;
-                case "lending":
-                    query.sql = ""; //TODO (Joscupe) select everything from lending
-                    break;
-                case "remove_lend":
-                    query.sql = ""; //TODO (Joscupe) remove lending at id
-                    query.values = [attr.lenId];
-                    break;
-                default: res.status(501).send("command unknown")
-            }
-            query.sql!==undefined ? db.query(query.sql, query.values, (err, result)=> {err ? res.sendStatus(503).send({result:undefined, error: err}) : res.send({result:result})}) : res.sendStatus(503).send({result: undefined, error:"db error, no connection"});
-        }else{
-            res.sendStatus(418).send({admin: false, error:"Pls, send admin verification."})
-        }
-    })
-})
 app.post("/update", (req, res)=>{ //TESTED
     const user = req.body.user;
     const pwd_old = sha256(req.body.pwd_old).toString();
@@ -264,6 +228,63 @@ app.post("/update", (req, res)=>{ //TESTED
         }
     );
 }) //TESTED
+app.post("/admin", (req, res)=>{
+    const user = req.body.user;
+    const pwd = req.body.pwd;
+    const command = req.body.command;
+    const attr = req.body.attributes;
+    axios.post(domain+"/login", {mail:user, password:pwd}).then((response)=>{
+        console.log(response.data.admin)
+        if(response.data.login && response.data.admin) {
+            console.log("admin verified");
+            const query = {
+                sql: undefined,
+                values: []
+            }
+            switch (command) {
+                case "check":
+                    query.sql="select 'true' as admin;"
+                    break;
+                case "all_user":
+                    query.sql = "select * from TUsers;";
+                    break;
+                case "user":
+                    query.sql = "select * from TUsers where UsMail=(?);";
+                    query.values = [attr.mail];
+                    break;
+                case "admin":
+                    query.sql = "update TUsers set UsRole='admin' where UsMail=(?);";
+                    query.values = [attr.mail]
+                    break;
+                case "lending":
+                    query.sql = "select * from TLendings;";
+                    break;
+                case "remove_lend":
+                    query.sql = "update TLendings set LenEnd = now() where LenId=(?);";
+                    query.values = [attr.lenId];
+                    break;
+                case "all_ntfs":
+                    query.sql = "select * from TNFTSongs;";
+                    break;
+                case "delete_nft":
+                    query.sql = "delete from TNFTSongs where NFToken=(?);";
+                    query.values = [attr.token]
+                    break;
+                case "add_nft":
+                    query.sql = "insert into TNFTSongs (NFToken, NFInterpret, NFName, NFLength, NFYear) values (?, ?, ?, ?, ?);"
+                    query.values =[attr.token, attr.interpret, attr.name, attr.length, attr.year]
+                    break;
+                default:
+                    res.send("command unknown")
+            }
+            query.sql !== undefined ? db.query(query.sql, query.values, (err, result) => {
+                err ? res.send({result: undefined, error: err}) : res.send({result: result})
+            }) : res.send({result: undefined, error: "db error, no connection"});
+        } else {
+            res.send({admin: false, error: "Pls, send admin verification."})
+        }
+    })
+})
 schedule.scheduleJob('0 0 * * *', ()=>{ //runs every 24h at 0:0 // when is a lending expired? extra function!
     db.query("", //TODO (Joscupe) select all lendings which have expired or which have no end date (would be nice if start date = 5 days in the past (if not additions are needed by (MrS-E)))
         (err, result)=>{
