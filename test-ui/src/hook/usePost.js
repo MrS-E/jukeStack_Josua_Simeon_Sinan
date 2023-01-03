@@ -18,7 +18,7 @@ function usePost(url, data_in) {
             .finally(() => {
                 setLoading(false);
             })
-    }, [url, data_in]);
+    }, [url]);
 
     return {data, loading, error}
 }

@@ -70,7 +70,7 @@ app.post("/register", (req, res) => { //TESTED
         }
     );
 }); //TESTED
-app.get("/list", (req, res)=>{
+app.get("/list", (req, res)=>{ //TESTED
     db.query("select * from TNFTSongs",
         (err, result)=>{
             if(err){
@@ -80,8 +80,8 @@ app.get("/list", (req, res)=>{
                 res.send({result: result});
             }
         });
-});
-app.post("/lend", (req, res)=>{
+}); //TESTED
+app.post("/lend", (req, res)=>{ //TESTED
     const token = req.body.NFToken;
     const userMail = req.body.mail;
     const userPwd = req.body.pwd;
@@ -114,13 +114,13 @@ app.post("/lend", (req, res)=>{
             res.send({lend:false, error:"not authorized"})
         }
     })
-});
+}); //TESTED
 app.post("/lendings", (req, res)=>{ //TESTED
     const userMail = req.body.user;
     const userPwd = req.body.pwd;
     axios.post(domain+"/login", {mail:userMail, password:userPwd}).then((response)=>{
         if(response.data.login) {
-            db.query("select distinct UsFName, USSName, NFName, NFInterpret, NFLength, NFYear, concat(date_format(LenStart, '%d %M %Y'),' ', time_format(LenStart, '%H:%i:%s')) as LenDate from TUsers natural join TLendings l natural join TNFTSongs where l.UsMail = (?) and LenEnd is null;",
+            db.query("select distinct LenId, NFToken, UsFName, USSName, NFName, NFInterpret, NFLength, NFYear, concat(date_format(LenStart, '%d %M %Y'),' ', time_format(LenStart, '%H:%i:%s')) as LenDate from TUsers natural join TLendings l natural join TNFTSongs where l.UsMail = (?) and LenEnd is null;",
                 [userMail],
                 (err, result) => {
                     if (err) {
@@ -138,18 +138,27 @@ app.post("/lendings", (req, res)=>{ //TESTED
         }
     })
 }); //TESTED
-app.get("/return", (req, res)=>{
-    const LenID = req.query.id;
-    db.query("update TLendings set LenEnd = now() where LenId = (?);",
-        [/*user,NFToken,*/LenID],
-        (err)=>{
-            if(err){
-                console.log("return:",err);
-                res.send({return:false, error:err})
-            }else{
-                res.send({return:true, song: NFToken, user: user});
-            }
-        });
+app.post("/return", (req, res)=> {
+    const LenID = req.body.id;
+    const mail = req.body.mail;
+    const pwd = req.body.pwd;
+
+    axios.post(domain + "/login", {mail: mail, password: pwd}).then((response) => {
+        if (response.data.login) {
+            db.query("update TLendings set LenEnd = now() where LenId = (?);",
+                [/*user,NFToken,*/LenID],
+                (err) => {
+                    if (err) {
+                        console.log("return:", err);
+                        res.send({return: false, error: err, message:"Something went wrong. Please try again."})
+                    } else {
+                        res.send({return: true, LenID: LenID, message:"The NFT songs is successful returned."});
+                    }
+                });
+        }else{
+            res.send({return:false, message:"Something went wrong. Please try again."})
+        }
+    });
 });
 app.post("/user", (req, res)=>{ //TESTED
     const mail = req.body.user;
