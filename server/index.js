@@ -70,6 +70,30 @@ app.post("/register", (req, res) => { //TESTED
         }
     );
 }); //TESTED
+app.post("/history", (req, res)=> {
+    const mail = req.body.mail;
+    const pwd = req.body.pwd;
+    axios.post(domain + "/login", {mail: mail, password: pwd}).then((response) => {
+        if (response.data.login) {
+            db.query("select distinct NFToken, NFName, NFInterpret, NFLength, NFYear, concat(date_format(LenStart, '%d.%m.%Y'),' ', time_format(LenStart, '%H:%i:%s')) as LenDateStart, concat(date_format(LenEnd, '%d.%m.%Y'),' ', time_format(LenEnd, '%H:%i:%s')) as LenDateEnd from TUsers natural join TLendings l natural join TNFTSongs where l.UsMail = (?);",
+                [mail], (err, result) => {
+                    if (err) {
+                        console.log("history:", err);
+                        res.send({history: [], error: err});
+                    } else {
+                        if (result.length > 0) {
+                            res.send({history: result});
+                        } else {
+                            res.send({history: [], error: "user has nothing rented yet"})
+                        }
+                    }
+                }
+            );
+        }else{
+            res.send({history: [], error: "Something went wrong"})
+        }
+    })
+})
 app.get("/list", (req, res)=>{ //TESTED
     db.query("select * from TNFTSongs",
         (err, result)=>{
@@ -138,7 +162,7 @@ app.post("/lendings", (req, res)=>{ //TESTED
         }
     })
 }); //TESTED
-app.post("/return", (req, res)=> {
+app.post("/return", (req, res)=> { //TESTED
     const LenID = req.body.id;
     const mail = req.body.mail;
     const pwd = req.body.pwd;
@@ -159,7 +183,7 @@ app.post("/return", (req, res)=> {
             res.send({return:false, message:"Something went wrong. Please try again."})
         }
     });
-});
+}); //TESTED
 app.post("/user", (req, res)=>{ //TESTED
     const mail = req.body.user;
     const pwd = req.body.pwd

@@ -11,6 +11,7 @@ function Nft(props) {
     const [value, changeValue] = useState("");
     const [d_list, changeList] = useState(undefined);
     const [d_lent, changeLent] = useState(undefined);
+    const [d_history, changeHistory] = useState(undefined);
     const [reload, changeReload] = useState(true)
 
     useEffect(()=> {
@@ -19,6 +20,9 @@ function Nft(props) {
         })
         axios.post(props.domain + "/lendings", {user: cookies.name, pwd: cookies.pwd}).then((res)=>{
             changeLent(res.data)
+        })
+        axios.post(props.domain+"/history", {mail: cookies.name, pwd: cookies.pwd}).then((res)=>{
+            changeHistory(res.data)
         })
     },[reload])
 
@@ -172,7 +176,6 @@ function Nft(props) {
                             <Accordion.Header>Rented NFT songs</Accordion.Header>
                             <Accordion.Body>
                                 <div className="overflow-auto h-50">
-                                    <h3>Currently on lending</h3>
                                     <table className="table table-hover">
                                         <thead>
                                         <tr>
@@ -198,7 +201,41 @@ function Nft(props) {
                                         </tbody>
                                     </table>
                                 </div>
-
+                            </Accordion.Body>
+                        </Accordion.Item>
+                        <Accordion.Item eventKey="2">
+                            <Accordion.Header>History</Accordion.Header>
+                            <Accordion.Body>
+                                <div className="overflow-auto h-50">
+                                    <table className="table table-hover">
+                                        <thead>
+                                        <tr>
+                                            <th>Name</th>
+                                            <th>Interpret</th>
+                                            <th>Token</th>
+                                            <th>Year</th>
+                                            <th>Length</th>
+                                            <th>Lending start</th>
+                                            <th>Lending End</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        {d_history?d_history.history.map((d,i)=>{
+                                            return(
+                                                <tr key={i+"_"+d.NFToken+"_history"}>
+                                                    <td>{d.NFName}</td>
+                                                    <td>{d.NFInterpret}</td>
+                                                    <td>{d.NFToken}</td>
+                                                    <td>{d.NFYear}</td>
+                                                    <td>{d.NFLength}</td>
+                                                    <td>{d.LenDateStart}</td>
+                                                    <td>{d.LenDateEnd}</td>
+                                                </tr>
+                                            );
+                                        }):<tr><td colSpan={5}>Loading</td></tr>}
+                                        </tbody>
+                                    </table>
+                                </div>
                             </Accordion.Body>
                         </Accordion.Item>
                     </Accordion>
