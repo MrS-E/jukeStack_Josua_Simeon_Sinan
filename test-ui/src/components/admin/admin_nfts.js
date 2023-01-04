@@ -2,18 +2,19 @@ import React, {useEffect, useRef, useState} from 'react';
 import axios from "axios";
 import {useCookies} from "react-cookie";
 import {Button, Form} from "react-bootstrap";
+import Popup from "../popup";
 
 function AdminNfts(props) {
     const [cookies, setCookie] = useCookies(['user']);
     const [checked, changeCheck] = useState(false);
     const [loading, changeLoading] = useState(true);
+    const [trigger, changeTrigger] = useState(false)
+    const [value, changeValue] = useState("");
     const interpret = useRef(null);
     const name = useRef(null);
     const year = useRef(null);
     const lenght = useRef(null);
     const sub = useRef(null);
-
-
 
     useEffect( ()=> {
         axios.post(props.domain + "/admin/check", {user: cookies.name, pwd: cookies.pwd, attributes: {}})
@@ -25,6 +26,7 @@ function AdminNfts(props) {
 
     const new_nft = () =>{
         sub.current.setAttribute("disabled", true)
+        changeTrigger(false);
         axios.post(props.domain+"/admin/add_nft", {user: cookies.name, pwd: cookies.pwd, attributes:{interpret: interpret.current.value, name: name.current.value, length: lenght.current.value.toString()+":00", year: year.current.value}}).then(
             ()=>{
                 alert("NFT was added...")
@@ -32,10 +34,10 @@ function AdminNfts(props) {
             }
         )
     }
-
-    if(checked && !loading) {
-        return (
-            <div>
+    const add_nft = () => {
+        changeValue(
+            <>
+                <h3>Add NFT</h3>
                 <Form>
                     <Form.Group className="mb-3">
                         <Form.Label>Interpret</Form.Label>
@@ -57,7 +59,21 @@ function AdminNfts(props) {
                         Submit
                     </Button>
                 </Form>
-            </div>
+            </>
+        );
+        changeTrigger(true);
+    }
+
+    if(checked && !loading) {
+        return (
+            <>
+                <div className="mt-4">
+                   <button onClick={add_nft}>add nft</button>
+                </div>
+                <Popup trigger={trigger} changeTrigger={changeTrigger}>
+                    {value}
+                </Popup>
+            </>
         );
     }else if(loading){
         return (
