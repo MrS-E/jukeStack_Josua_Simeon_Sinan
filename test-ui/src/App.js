@@ -8,7 +8,7 @@ import { useCookies } from 'react-cookie';
 
 function App() { //TESTED
     const [cookies, setCookie] = useCookies(['user']);
-    const domain = "http://localhost:5000";
+    const domain = "http://192.168.1.107:5000";
     const user_ref = useRef(null);
     const pwd_ref = useRef(null);
     const sub_ref = useRef(null);
@@ -19,6 +19,14 @@ function App() { //TESTED
     const [login, changeLogin] = useState(false);
     const [failed, changeFailed] = useState("");
     const [admin, changeAdmin] = useState(false);
+
+    useEffect(()=>{
+        if(cookies.name && cookies.pwd){
+            changeNoRender(true);
+            changeUser(cookies.name);
+            changePasswd(cookies.pwd);
+        }
+    },[])
 
     useEffect(() => {
         if (noRender){
@@ -83,6 +91,7 @@ function App() { //TESTED
             })
             .catch();
     }
+
     if (!login) { //TESTED
         return (
             <div>

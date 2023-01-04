@@ -107,7 +107,7 @@ function User(props) {
 
     if(data) {
         return (
-        <>
+        <div className="mt-4">
             <div className="row">
                 <h1>User</h1>
                 <div className="row">
@@ -142,11 +142,11 @@ function User(props) {
                     {form}
                 </Popup>
             </div>
-        </>
+        </div>
         );
     }else if(loading){
         return(
-        <div>
+        <div className="mt-4">
             <h1>User is Loading</h1>
         </div>);
     }else{
