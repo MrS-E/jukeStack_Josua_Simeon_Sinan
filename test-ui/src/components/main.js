@@ -1,11 +1,14 @@
 import React from 'react';
 import {BrowserRouter, Link, Route, Routes} from "react-router-dom";
-import {Button, Container, Nav, Navbar, NavLink} from "react-bootstrap";
+import {Button, Container, Nav, Navbar, NavDropdown, NavLink} from "react-bootstrap";
 import User from "./user/user";
 import Nft from "./nft/nft";
 import Home from "./home/home";
 import Admin from "./admin/admin";
 import {useCookies} from "react-cookie";
+import AdminUsers from "./admin/admin_users";
+import AdminNfts from "./admin/admin_nfts";
+import AdminRents from "./admin/admin_rents";
 
 function Main(props) {
     const [cookies, setCookie] = useCookies(['user']);
@@ -22,7 +25,11 @@ function Main(props) {
                                     <NavLink eventKey={0} as={Link} to="/">Home</NavLink>
                                     <NavLink eventKey={1} as={Link} to="/user">User</NavLink>
                                     <NavLink eventKey={2} as={Link} to="/nft">Songs</NavLink>
-                                    {props.admin?<NavLink eventKey={3} as={Link} to="/admin">Admin</NavLink>:""}
+                                    {props.admin?<NavDropdown title="Admin">
+                                        <NavDropdown.Item as={Link} to="/admin/users">Users</NavDropdown.Item>
+                                        <NavDropdown.Item as={Link} to="/admin/nfts">NFTs</NavDropdown.Item>
+                                        <NavDropdown.Item as={Link} to="/admin/rents">Rents</NavDropdown.Item>
+                                    </NavDropdown>:""}
                                 </Nav>
                                 <Navbar.Text>
                                     Signed in as {props.user}
@@ -41,7 +48,10 @@ function Main(props) {
                     <Routes>
                         <Route path='/user' element={<User domain={props.domain}/>}/>
                         <Route path='/nft' element={<Nft domain={props.domain}/>}/>
-                        <Route path='/admin' element={<Admin domain={props.domain}/>}/>
+                        <Route path='/admin/users' element={<AdminUsers domain={props.domain}/>}/>
+                        <Route path='/admin/nfts' element={<AdminNfts domain={props.domain}/>}/>
+                        <Route path='/admin/rents' element={<AdminRents domain={props.domain}/>}/>
+                        <Route excat path='/admin' element={<Admin domain={props.domain}/>}/>
                         <Route exact path='/' element={<Home domain={props.domain}/>}/>
                         <Route path='*' element={
                            <div className="row">

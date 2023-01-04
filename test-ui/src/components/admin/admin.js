@@ -25,10 +25,8 @@ function Admin(props) {
                 .then((res_users)=>{ changeUsers(res_users.data)})
             axios.post(props.domain+"/admin/lendings", {user:cookies.name, pwd:cookies.pwd, attributes:{}})
                 .then((res_rents)=>{ changeLend(res_rents.data)})
-            axios.post(props.domain+"/admin/all_ntfs", {user:cookies.name, pwd:cookies.pwd, attributes:{}})
-                .then((res_ntfs)=>{ changeNFTs(res_ntfs.data)
-                console.log(res_ntfs.data)
-                })
+            axios.post(props.domain+"/admin/nfts", {user:cookies.name, pwd:cookies.pwd, attributes:{}})
+                .then((res_ntfs)=>{ changeNFTs(res_ntfs.data)})
         }
     }, [checked])
 
@@ -96,7 +94,7 @@ function Admin(props) {
                                     <tbody>
                                     {lendings?lendings.map((d, key)=>{
                                         return(
-                                            <tr key={key+d.LenId} id={d.LenId} onClick={e=>lendHandler(e)}>
+                                            <tr key={key+"_"+d.LenId+"_admin"} id={d.LenId} onClick={e=>lendHandler(e)}>
                                                 <td>{d.UsMail}</td>
                                                 <td>{d.NFToken}</td>
                                                 <td>{d.LenStart}</td>
@@ -124,6 +122,17 @@ function Admin(props) {
                                     </tr>
                                     </thead>
                                     <tbody>
+                                    {nfts?nfts.map((d, key)=>{
+                                        return(
+                                            <tr key={key+d.NFToken} id={d.NFToken} onClick={e=>nftHandler(e)}>
+                                                <td>{d.NFToken}</td>
+                                                <td>{d.NFName}</td>
+                                                <td>{d.NFInterpret}</td>
+                                                <td>{d.NFLength}</td>
+                                                <td>{d.NFYear}</td>
+                                            </tr>
+                                        );
+                                    }):<tr><td colSpan={5}>Loading</td></tr>}
                                     </tbody>
                                 </table>
                             </div>
@@ -135,14 +144,14 @@ function Admin(props) {
     }
     else if(loading){
         return (
-            <div>
+            <div className="mt-4">
                 <h3>Loading</h3>
             </div>
         )
     }
     else{
         return(
-            <div>
+            <div className="mt-4">
                 <h3>You are a bit misguided, please go back to the normal sites.</h3>
             </div>
         );
