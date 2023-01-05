@@ -8,7 +8,7 @@ import { useCookies } from 'react-cookie';
 
 function App() { //TESTED
     const [cookies, setCookie] = useCookies(['user']);
-    const domain = "http://192.168.1.107:5000";
+    const domain = "http://192.168.24.141:5000"; //FIXME
     const user_ref = useRef(null);
     const pwd_ref = useRef(null);
     const sub_ref = useRef(null);
@@ -118,13 +118,13 @@ function App() { //TESTED
                                             <input
                                                 name="sal"
                                                 type="radio"
-                                                className="form-check-input mt-1"                                            checked={salu === "Sir"}
+                                                className="form-check-input m-1"                                            checked={salu === "Sir"}
                                                 onChange={()=>onOptionChange("Sir")}/>
                                             <span>Sir</span><br/>
                                             <input
                                                 name="sal"
                                                 type="radio"
-                                                className="form-check-input mt-1"                                            checked={salu === "Madam"}
+                                                className="form-check-input m-1"                                            checked={salu === "Madam"}
                                                 onChange={()=>onOptionChange("Madam")}/>
                                             <span>Madam</span><br/>
                                         </div>
