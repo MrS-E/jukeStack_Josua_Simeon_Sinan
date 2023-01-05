@@ -121,21 +121,21 @@ app.post("/lend", (req, res) => { //TESTED
                         if (result[0].amount < 5) {
                             db.query("select count(*) as lent from TLendings where NFToken = (?) and LenEnd is null;",
                                 [token], (err, result) => {
-                                if(result[0].lent === 0) {
-                                    db.query("insert into TLendings(LenStart, NFToken, UsMail) values(now(), ?,?) ",
-                                        [token, userMail],
-                                        (err) => {
-                                            if (err) {
-                                                console.log("lend (insert) error: ", err);
-                                                res.send({lend: false, error: err})
-                                            } else {
-                                                res.send({lend: true})
-                                            }
-                                        });
-                                } else {
-                                    res.send({lend:false, message:"Already lent."})
-                                }
-                            })
+                                    if (result[0].lent === 0) {
+                                        db.query("insert into TLendings(LenStart, NFToken, UsMail) values(now(), ?,?) ",
+                                            [token, userMail],
+                                            (err) => {
+                                                if (err) {
+                                                    console.log("lend (insert) error: ", err);
+                                                    res.send({lend: false, error: err})
+                                                } else {
+                                                    res.send({lend: true})
+                                                }
+                                            });
+                                    } else {
+                                        res.send({lend: false, message: "Already lent."})
+                                    }
+                                })
 
                         } else {
                             res.send({lend: false, message: "User " + userMail + " has to many outstanding NFTs rents"})
@@ -237,8 +237,8 @@ app.post("/update", (req, res) => { //TESTED
 }) //
 app.post("/nft_search", (req, res) => {
     const search = "%" + req.body.search + "%";
-    db.query("select *  from TNFTSongs where NFToken like (?) or NFName like (?) or NFInterpret like (?) or NFYear like (?)", [search,search,search,search], (err, response) => {
-        if(err) {
+    db.query("select *  from TNFTSongs where NFToken like (?) or NFName like (?) or NFInterpret like (?) or NFYear like (?)", [search, search, search, search], (err, response) => {
+        if (err) {
             console.log("search error: ", err);
         } else {
             res.send(response);
@@ -287,61 +287,62 @@ app.post("/admin/:action", (req, res) => {
                     break;
                 case "add_nft":
                     let tokenName = "NFT";
-                    if(attr.interpret !== null) {
-                        if(attr.interpret.length >= 3) {
-                            tokenName += attr.interpret.substring(0,3);
-                        } else if(attr.interpret.length === 2) {
-                            tokenName += attr.interpret.substring(0,2) + "X";
-                        } else if(attr.interpret.length === 1) {
-                            tokenName += attr.interpret.substring(0,1) + "XY";
+                    if (attr.interpret !== null) { // First 3 Letters of the token are the first 3 Letters of to interpret
+                        if (attr.interpret.length >= 3) {
+                            tokenName += attr.interpret.substring(0, 3);
+                        } else if (attr.interpret.length === 2) {
+                            tokenName += attr.interpret.substring(0, 2) + "X"; // Interpret has only 2 Letters
+                        } else if (attr.interpret.length === 1) {
+                            tokenName += attr.interpret.substring(0, 1) + "XY"; // Interpret has only 1 Letter
                         }
-                    } else {
+                    } else { // If the Interpret is unknown
                         tokenName += "UKN" //Unknown
                     }
-                    if(attr.name.length >= 3) {
-                        tokenName += attr.name.substring(0,3);
-                    } else if(attr.name.length === 2) {
-                        tokenName += attr.name.substring(0,2) + "X";
-                    } else if(attr.name.length === 1 ) {
-                        tokenName += attr.name.substring(0,1) + "XY";
-                    } else {
+                    if (attr.name.length >= 3) { // the next 3 Letter of the token are the first 3 Letters of the name from the song
+                        tokenName += attr.name.substring(0, 3);
+                    } else if (attr.name.length === 2) {
+                        tokenName += attr.name.substring(0, 2) + "X"; // The song name has only 2 Letters
+                    } else if (attr.name.length === 1) {
+                        tokenName += attr.name.substring(0, 1) + "XY"; // The song name has only 1 letter
+                    } else { // The song name is empty
                         tokenName += "SPC"; //Space
                     }
-                    console.log("Year attribute: ", attr.year);
-                    if(attr.year !== undefined) {
-                        tokenName += attr.year.substring(2,4);
+                    // The next 2 letters are the last 2 digits of the song release year
+                    if (attr.year !== "0000") { //If year is not defined it is 0000
+                        tokenName += attr.year.substring(2, 4);
                     } else {
-                        tokenName += 99
+                        tokenName += "00";
                     }
-                    tokenName += new Date().getTime().toString().substring(8,13);
-                    function tok(tokenN) {
-                        const abc = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-                        db.query("select count(*) as token from TNFTSongs where NFToken = (?)",[tokenN], (err, res) => {
-                            //let tokenCopy = tokenN;
-                            let letterAtEnd = false;
-                            if(res[0].token > 0) {
-                                for(let i = 0; i < abc.length && !letterAtEnd; i++) {
-                                    if(abc.charAt(i) === tokenN.charAt(15)) {
-                                        tokenN = tokenN.substring(0, 15) + abc.charAt(i + 1);
-                                        letterAtEnd = true;
-                                    }
+                    tokenName += new Date().getTime().toString().substring(8, 13); // The last 5 letters are 5 digits of the current date converted in an int and then converted in a sting
+                    // This function checks if the Token already exists
+                function tok(tokenN) {
+                    const abc = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+                    db.query("select count(*) as token from TNFTSongs where NFToken = (?)", [tokenN], (err, res) => { //selects the number of equal token in the database
+                        let letterAtEnd = false;
+                        if (res[0].token > 0) {
+                            for (let i = 0; i < abc.length && !letterAtEnd; i++) { // find out which is the last letter
+                                if (abc.charAt(i) === tokenN.charAt(15)) {
+                                    tokenN = tokenN.substring(0, 15) + abc.charAt(i + 1);
+                                    letterAtEnd = true;
                                 }
-                                if(!letterAtEnd) {
-                                    tokenN = tokenN.substring(0,15) + abc.charAt(0);
-                                    console.log("Changed A " + tokenN);
-                                }
-                                tok(tokenN);
-                            } else {
-                                db.query("insert into TNFTSongs (NFToken, NFInterpret, NFName, NFLength, NFYear) values (?, ?, ?, ?, ?)", [tokenN, attr.interpret, attr.name, attr.length, attr.year]);
                             }
-                        });
-                    }
+                            if (!letterAtEnd) { // if there is no letter at the end then set it to a
+                                tokenN = tokenN.substring(0, 15) + abc.charAt(0);
+                                console.log("Changed A " + tokenN);
+                            }
+                            tok(tokenN);
+                        } else {
+                            db.query("insert into TNFTSongs (NFToken, NFInterpret, NFName, NFLength, NFYear) values (?, ?, ?, ?, ?)", [tokenN, attr.interpret, attr.name, attr.length, attr.year]);
+                        }
+                    });
+                }
+
                     tok(tokenName);
-                    res.send("Der Benutzer wurde hinzugefügt.");
+                    res.send("user added");
                     break;
                 case "edit_nft":
-                    query.sql="update TNFTSongs set NFInterpret=(?), NFName=(?), NFLength=(?), NFYear=(?) where NFToken=(?);";
-                    query.values=[attr.interpret, attr.name, attr.lenght, attr.year, attr.token];
+                    query.sql = "update TNFTSongs set NFInterpret=(?), NFName=(?), NFLength=(?), NFYear=(?) where NFToken=(?);";
+                    query.values = [attr.interpret, attr.name, attr.lenght, attr.year, attr.token];
                     break;
                 default:
                     res.send("command unknown")
@@ -349,7 +350,7 @@ app.post("/admin/:action", (req, res) => {
             if (query.sql !== undefined) {
                 db.query(query.sql, query.values, (err, result) => {
                     res.send(result);
-                    if(err) {
+                    if (err) {
                         console.log("admin-tools error: ", err);
                     }
                 })
