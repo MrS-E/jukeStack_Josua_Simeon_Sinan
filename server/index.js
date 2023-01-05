@@ -1,53 +1,63 @@
-const key = require("./db_key.js"); //keyfile with has an exported const with db key (file is in .gitignore)
-const sha256 = require("crypto-js/sha256.js");
+const sha256 = require("crypto-js/sha256");
 const express = require("express");
-const mysql = require("mysql");
+const mysql = require("mysql2"); //mysql2 because with mysql I have the error: 'ER_NOT_SUPPORTED_AUTH_MODE'
 const schedule = require('node-schedule');
 const cors = require("cors");
-const bodyParser = require("body-parser");
 
 const app = express();
 app.use(cors());
-app.use(bodyParser.json()); //to manage the parsing of the body from react app
+app.use(express.json()); //to manage the parsing of the body from react app
 
 const db = mysql.createConnection({ //DB Connection
-    user: "jukSiSiJo", //TODO (Joscupe) user
+    user: "jukSiSiJo",
     host: "i-kf.ch",
-    password: key, //careful key is in not sync file "db_key.js" under key const
+    password: process.env.DB_KEY || require("./variables").DB_KEY, //careful key is in not sync file "keys.env" like (DB_KEY="...")
     database: "jukeStackDB_SimeonSinanJosua",
 });
+db.connect((err) =>{
+    if (err){
+        console.log(err)
+    } else {
+        console.log("Connected to DB!");
+    }
+});
 
-app.get("/login", (req, res)=>{
+app.get("/", (req, res)=>{
+    res.send("Server is running")
+})
+
+app.post("/login", (req, res)=>{
     const mail = req.body.mail;
     const password = sha256(req.body.password);
     db.query("select UsPasswd from TUsers where UsMail = (?)", //select user which has the password
         [mail],
         (err, result) => {
-        if(err){
-            console.log("login:",err)
-            res.send({login:false, error: err})
-        }else{
-            if(result.length===1){
-                if(password===result[0]){
-                    result.send({login:true, user: mail, error: null})
-                }else{
-                    result.send({login:false, error: "wrong password"})
-                }
+            if(err){
+                console.log("login:",err)
+                res.send({login:false, error: err})
             }else{
-                res.send({login:false, error: "user not found"});
+                if(result.length===1){
+                    if(password===result[0]){
+                        result.send({login:true, user: mail, error: null})
+                    }else{
+                        result.send({login:false, error: "wrong password"})
+                    }
+                }else{
+                    res.send({login:false, error: "user not found"});
+                }
             }
-        }
-    });
+        });
 });
-
 app.post("/register", (req, res) => {
+    console.log("register")
+    //console.log(req);
     const mail = req.body.mail;
     const salutation = req.body.salutation;
     const first = req.body.firstName;
     const last = req.body.lastName;
     const password = sha256(req.body.password);
-
-    db.query("insert into TUsers values(?,?,?,?,?)", //TODO (Joscupe) insert user
+    //console.log(req.body.password);
+    db.query("insert into TUsers values(?,?,?,?,?,'user')", // To add an admin you have to do it in the DB directly
         [mail, salutation,first,last,password],
         (err) => {
             if (err) {
@@ -55,84 +65,81 @@ app.post("/register", (req, res) => {
                 res.send({register:false, error:err})
             } else {
                 res.send({register:true});
+                console.log("User added")
             }
         }
     );
 });
 
 app.get("/list", (req, res)=>{
-    db.query("select * from TNFTSongs",//TODO (Joscupe) select all songs from db
+    db.query("select * from TNFTSongs",
         (err, result)=>{
-        if(err){
-            console.log("list:",err);
-            res.send({result: null, error: err});
-        }else{
-            res.send({result: result});
-        }
-    });
+            if(err){
+                console.log("list:",err);
+                res.send({result: null, error: err});
+            }else{
+                res.send({result: result});
+            }
+        });
 });
-
 app.post("/lend", (req, res)=>{
     const token = req.body.NFToken;
     const userMail = req.body.mail;
-    db.query("select count(*) from TLendings where UsMail = '?' and LenEnd is null;", //TODO (Joscupe) select all active lends from user
+    db.query("select count(*) from TLendings where UsMail = '(?)' and LenEnd is null;",
         [userMail],
         (err, result)=>{
-        if(err){
-            console.log("lend (select):", err)
-            res.send({lend:false, error: err})
-        }else{
-            if(result.length<5){
-                db.query("insert into TLandings(LenStart, NFToken, UsMail) values(now(), ?,?) ", //TODO (Joscupe) insert TLendings
-                    [token, userMail],
-                    (err) => {
-                        if(err){
-                            console.log("lend (insert):", err);
-                            res.send({lend:false, error:err})
-                        }else{
-                            res.send({lend: true})
-                        }
-                    });
+            if(err){
+                console.log("lend (select):", err)
+                res.send({lend:false, error: err})
             }else{
-                res.send({lend:false, error:"user "+userMail+" has to many outstanding Lendings"})
+                if(result.length<5){
+                    db.query("insert into TLandings(LenStart, NFToken, UsMail) values(now(), ?,?) ",
+                        [token, userMail],
+                        (err) => {
+                            if(err){
+                                console.log("lend (insert):", err);
+                                res.send({lend:false, error:err})
+                            }else{
+                                res.send({lend: true})
+                            }
+                        });
+                }else{
+                    res.send({lend:false, error:"user "+userMail+" has to many outstanding Lendings"})
+                }
             }
-        }
         })
 });
-
-app.get("/lendings", (req, res)=>{
-    const userMail = req.body.mail;
-    db.query("select distinct UsFName, USSName, NFName, NFInterpret, NFLength, NFYear, LenStart from TUsers natural join TLendings l natural join TNFTSongs where l.UsMail = (?);", //TODO (Joscupe) select all lend songs from user which have no end date (if return with deletion additions are needed by (MrS-E)).
+app.get("/lendings/:user", (req, res)=>{
+    const userMail = req.params.user;
+    db.query("select distinct UsFName, USSName, NFName, NFInterpret, NFLength, NFYear, LenStart from TUsers natural join TLendings l natural join TNFTSongs where l.UsMail = (?);",
         [userMail],
         (err, result)=>{
-        if(err){
-            console.log("lendings:",err);
-            res.send({lending:undefined, error:err});
-        }else{
-            if(result.length>0) {
-                res.send({lending: result});
+            if(err){
+                console.log("lendings:",err);
+                res.send({lending:undefined, error:err});
             }else{
-                res.send({lending:null, error:"user has nothing rented"})
+                if(result.length>0) {
+                    res.send({lending: result});
+                }else{
+                    res.send({lending:null, error:"user has nothing rented"})
+                }
             }
-        }
         }
     );
 });
-
-app.put("/return", (req, res)=>{
-    const LenID = req.body.songId;
-    db.query("update TLendings set LenEnd = now() where LenId = (?);", //TODO (Joscupe) update of lending with end time. -> (MrS-E) edit of function
+app.get("/return/:id", (req, res)=>{
+    const LenID = req.params.id;
+    db.query("update TLendings set LenEnd = now() where LenId = (?);",
         [/*user,NFToken,*/LenID],
         (err)=>{
-        if(err){
-            console.log("return:",err);
-            res.send({return:false, error:err})
-        }else{
-            res.send({return:true, song: NFToken, user: user});
-        }
+            if(err){
+                console.log("return:",err);
+                res.send({return:false, error:err})
+            }else{
+                res.send({return:true, song: NFToken, user: user});
+            }
         });
 });
-
 schedule.scheduleJob('0 0 * * *', ()=>{ //runs every 24h at 0:0 // when is a lending expired? extra function!
     db.query("", //TODO (Joscupe) select all lendings which have expired or which have no end date (would be nice if start date = 5 days in the past (if not additions are needed by (MrS-E)))
         (err, result)=>{
@@ -152,6 +159,21 @@ schedule.scheduleJob('0 0 * * *', ()=>{ //runs every 24h at 0:0 // when is a len
         });
 });
 
-app.listen(8080, () => {
-    console.log("Server started at port 8080");
+app.post("/admin", (req, res)=>{
+    const user = req.body.admin;
+    const pwd = req.body.pwd;
+    const command = req.body.command;
+    const attr = req.body.attributes;
+    db.query("", [user, pwd], (err, result)=>{ //TODO (Joscupe) select if admin
+       if(result.length===1){
+           console.log("admin verified");
+           switch(command){
+               case "": break;
+               default: res.status(100).send("command unknown");
+           }
+       }
+    })
+})
+app.listen(require("./variables").PORT, () => {
+    console.log("Server started at port "+ require("./variables").PORT);
 });
