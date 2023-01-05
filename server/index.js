@@ -10,14 +10,14 @@ app.use(cors());
 app.use(express.json()); //to manage the parsing of the body from react app
 
 const db = mysql.createConnection({ //DB Connection
-    user: "jukSiSiJo",
-    host: "i-kf.ch",
-    password: process.env.DB_KEY || require("./variables").DB_KEY, //careful key is in not sync file "keys.env" like (DB_KEY="...")
+    user: /*"jukSiSiJo"*/ "root",
+    host: /*"i-kf.ch"*/ "localhost",
+    password: /*process.env.DB_KEY || require("./variables").DB_KEY*/ "", //careful key is in not sync file "keys.env" like (DB_KEY="...")
     database: "jukeStackDB_SimeonSinanJosua",
 });
 db.connect((err) => {
     if (err) {
-        console.log(err)
+        console.log("DB Connection error: ", err);
     } else {
         console.log("Connected to DB!");
     }
@@ -33,7 +33,7 @@ app.post("/login", (req, res) => {
         [mail],
         (err, result) => {
             if (err) {
-                console.log("login", Date.now(), ":", err)
+                console.log("login error: ", Date.now(), ":", err)
                 res.send({login: false, error: err})
             } else {
                 if (result.length === 1) {
@@ -62,7 +62,7 @@ app.post("/register", (req, res) => { //TESTED
         [mail, salutation, first, last, password],
         (err) => {
             if (err) {
-                console.log("register:", Date.now(), ":", err);
+                console.log("register error: ", Date.now(), ":", err);
                 res.send({register: false, error: err})
             } else {
                 res.send({register: true});
@@ -78,7 +78,7 @@ app.post("/history", (req, res) => { //TESTED
             db.query("select distinct NFToken, NFName, NFInterpret, NFLength, NFYear, concat(date_format(LenStart, '%d.%m.%Y'),' ', time_format(LenStart, '%H:%i:%s')) as LenDateStart, concat(date_format(LenEnd, '%d.%m.%Y'),' ', time_format(LenEnd, '%H:%i:%s')) as LenDateEnd from TUsers natural join TLendings l natural join TNFTSongs where l.UsMail = (?);",
                 [mail], (err, result) => {
                     if (err) {
-                        console.log("history:", err);
+                        console.log("history error: ", err);
                         res.send({history: [], error: err});
                     } else {
                         if (result.length > 0) {
@@ -98,7 +98,7 @@ app.get("/list", (req, res) => { //TESTED
     db.query("select * from TNFTSongs",
         (err, result) => {
             if (err) {
-                console.log("list:", err);
+                console.log("list error: ", err);
                 res.send({result: null, error: err});
             } else {
                 res.send({result: result});
@@ -115,7 +115,7 @@ app.post("/lend", (req, res) => { //TESTED
                 [userMail],
                 (err, result) => {
                     if (err) {
-                        console.log("lend (select):", err)
+                        console.log("lend (select) error: ", err)
                         res.send({lend: false, error: err})
                     } else {
                         if (result[0].amount < 5) {
@@ -126,7 +126,7 @@ app.post("/lend", (req, res) => { //TESTED
                                         [token, userMail],
                                         (err) => {
                                             if (err) {
-                                                console.log("lend (insert):", err);
+                                                console.log("lend (insert) error: ", err);
                                                 res.send({lend: false, error: err})
                                             } else {
                                                 res.send({lend: true})
@@ -156,7 +156,7 @@ app.post("/lendings", (req, res) => { //TESTED
                 [userMail],
                 (err, result) => {
                     if (err) {
-                        console.log("lendings:", err);
+                        console.log("lendings error: ", err);
                         res.send({lending: [], error: err});
                     } else {
                         if (result.length > 0) {
@@ -181,7 +181,7 @@ app.post("/return", (req, res) => { //TESTED
                 [/*user,NFToken,*/LenID],
                 (err) => {
                     if (err) {
-                        console.log("return:", err);
+                        console.log("return error: ", err);
                         res.send({return: false, error: err, message: "Something went wrong. Please try again."})
                     } else {
                         res.send({return: true, LenID: LenID, message: "The NFT songs is successful returned."});
@@ -226,26 +226,25 @@ app.post("/update", (req, res) => { //TESTED
     db.query("update TUsers set UsMail=(?), UsPasswd=(?) where UsMail=(?) and UsPasswd=(?)",
         [mail, pwd_new, user, pwd_old],
         (err, result) => {
-            console.log(result)
             if (err) {
-                console.log("update:", Date.now(), ":", err);
+                console.log("update error: ", Date.now(), ":", err);
                 res.send({update: false, error: err})
             } else {
                 res.send({update: true, result: result});
             }
         }
     );
-}) //TESTED
+}) //
+app.post("/nft_search", (req, res) => {
+
+} )
 app.post("/admin/:action", (req, res) => {
     const user = req.body.user;
     const pwd = req.body.pwd;
     const attr = req.body.attributes;
     const action = req.params.action;
-    console.log(action);
     axios.post(domain + "/login", {mail: user, password: pwd}).then((response) => {
-        console.log(response.data.admin)
         if (response.data.login && response.data.admin) {
-            console.log("admin verified");
             const query = {
                 sql: undefined,
                 values: []
@@ -280,7 +279,6 @@ app.post("/admin/:action", (req, res) => {
                     query.values = [attr.token]
                     break;
                 case "add_nft":
-                    console.log("NFT");
                     let tokenName = "NFT";
                     if(attr.interpret !== null) {
                         if(attr.interpret.length >= 3) {
@@ -307,10 +305,39 @@ app.post("/admin/:action", (req, res) => {
                     } else {
                         tokenName += 99
                     }
-                    tokenName += new Date().getTime().toString().substring(3,8);
-                    console.log(tokenName);
-                    //query.sql = "insert into TNFTSongs (NFToken, NFInterpret, NFName, NFLength, NFYear) values (?, ?, ?, ?, ?);"
-                    //query.values = [attr.token, attr.interpret, attr.name, attr.length, attr.year]
+                    tokenName += new Date().getTime().toString().substring(8,13);
+                    console.log("Date Log: " + new Date().getTime().toString());
+                    function tok(tokenN) {
+                        const abc = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+                        db.query("select count(*) as token from TNFTSongs where NFToken = (?)",[tokenN], (err, res) => {
+                            //let tokenCopy = tokenN;
+                            let letterAtEnd = false;
+                            if(res[0].token > 0) {
+                                for(let i = 0; i < abc.length && !letterAtEnd; i++) {
+                                    if(abc.charAt(i) === tokenN.charAt(15)) {
+                                        if(i === 15) {
+
+                                        }
+                                        tokenN = tokenN.substring(0, 15) + abc.charAt(i + 1);
+                                        //console.log("Changed L " + tokenN);
+                                        letterAtEnd = true;
+                                    }
+                                }
+                                if(!letterAtEnd) {
+                                    tokenN = tokenN.substring(0,15) + abc.charAt(0);
+                                    console.log("Changed A " + tokenN);
+                                }
+                                tok(tokenN);
+                            } else {
+                                //console.log(tokenN);
+                                db.query("insert into TNFTSongs (NFToken, NFInterpret, NFName, NFLength, NFYear) values (?, ?, ?, ?, ?)", [tokenN, attr.interpret, attr.name, attr.length, attr.year]);
+                            }
+                        });
+                    }
+                    tok(tokenName);
+                    break;
+                case "edit_nft":
+                    query.sql="update TUsers set NFInterpret=(?), NFName=(?), NFLength=(?), NFYear=(?) where NFToken=(?);";query.values=[attr.interpret, attr.name, attr.lenght, attr.year, attr.token];
                     break;
                 default:
                     res.send("command unknown")
@@ -318,7 +345,9 @@ app.post("/admin/:action", (req, res) => {
             if (query.sql !== undefined) {
                 db.query(query.sql, query.values, (err, result) => {
                     res.send(result);
-                    console.log(err);
+                    if(err) {
+                        console.log("admin-tools error: ", err);
+                    }
                 })
             }
         } else {
@@ -330,14 +359,14 @@ schedule.scheduleJob('0 0 * * *', () => { //runs every 24h at 0:0 // when is a l
     db.query("", //TODO (Joscupe) select all lendings which have expired or which have no end date (would be nice if start date = 5 days in the past (if not additions are needed by (MrS-E)))
         (err, result) => {
             if (err) {
-                console.log(err);
+                console.log("Schedule error: ", err);
             } else {
                 result.forEach((d) => {
                     db.query("", //TODO (Joscupe) update lending with end date -> if deletion additions are needed here by (MrS-E & Joscupe)
                         [d.LenId],
                         (err) => {
                             if (err) {
-                                console.log(err);
+                                console.log("Schedule error: ", err);
                             }
                         });
                 });
