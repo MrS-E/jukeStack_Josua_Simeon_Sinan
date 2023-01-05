@@ -6,29 +6,6 @@ import "./css/main.css";
   console.log(res);
 });*/
 
-addline("baum", "baum", "baum", "#ownedsongs");
-addline("ast", "ast", "ast", "#leansongs");
-
-function createTdEl(content) {
-  let elTd = document.createElement("td");
-  elTd.textContent = content;
-  return elTd;
-}
-
-function createRowEl(entries) {
-  let elRow = document.createElement("tr");
-  for (let entry of entries) {
-    elRow.appendChild(createTdEl(entry));
-  }
-  return elRow;
-}
-
-function addline(songname, songinterpret, songrelease, list) {
-  let elTBody = document.querySelector(list);
-  let elNewRow = createRowEl([songname, songinterpret, songrelease]);
-  elTBody.appendChild(elNewRow);
-}
-
 function NFT(props) {
   //if button clicked props.changeUser("user")
   return (
