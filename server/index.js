@@ -236,8 +236,15 @@ app.post("/update", (req, res) => { //TESTED
     );
 }) //
 app.post("/nft_search", (req, res) => {
-
-} )
+    const search = "%" + req.body.search + "%";
+    db.query("select *  from TNFTSongs where NFToken like (?) or NFName like (?) or NFInterpret like (?) or NFYear like (?)", [search,search,search,search], (err, response) => {
+        if(err) {
+            console.log("search error: ", err);
+        } else {
+            res.send(response);
+        }
+    })
+});
 app.post("/admin/:action", (req, res) => {
     const user = req.body.user;
     const pwd = req.body.pwd;
@@ -300,13 +307,13 @@ app.post("/admin/:action", (req, res) => {
                     } else {
                         tokenName += "SPC"; //Space
                     }
-                    if(attr.year !== null) {
+                    console.log("Year attribute: ", attr.year);
+                    if(attr.year !== undefined) {
                         tokenName += attr.year.substring(2,4);
                     } else {
                         tokenName += 99
                     }
                     tokenName += new Date().getTime().toString().substring(8,13);
-                    console.log("Date Log: " + new Date().getTime().toString());
                     function tok(tokenN) {
                         const abc = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
                         db.query("select count(*) as token from TNFTSongs where NFToken = (?)",[tokenN], (err, res) => {
@@ -315,11 +322,7 @@ app.post("/admin/:action", (req, res) => {
                             if(res[0].token > 0) {
                                 for(let i = 0; i < abc.length && !letterAtEnd; i++) {
                                     if(abc.charAt(i) === tokenN.charAt(15)) {
-                                        if(i === 15) {
-
-                                        }
                                         tokenN = tokenN.substring(0, 15) + abc.charAt(i + 1);
-                                        //console.log("Changed L " + tokenN);
                                         letterAtEnd = true;
                                     }
                                 }
@@ -329,15 +332,16 @@ app.post("/admin/:action", (req, res) => {
                                 }
                                 tok(tokenN);
                             } else {
-                                //console.log(tokenN);
                                 db.query("insert into TNFTSongs (NFToken, NFInterpret, NFName, NFLength, NFYear) values (?, ?, ?, ?, ?)", [tokenN, attr.interpret, attr.name, attr.length, attr.year]);
                             }
                         });
                     }
                     tok(tokenName);
+                    res.send("Der Benutzer wurde hinzugefügt.");
                     break;
                 case "edit_nft":
-                    query.sql="update TUsers set NFInterpret=(?), NFName=(?), NFLength=(?), NFYear=(?) where NFToken=(?);";query.values=[attr.interpret, attr.name, attr.lenght, attr.year, attr.token];
+                    query.sql="update TNFTSongs set NFInterpret=(?), NFName=(?), NFLength=(?), NFYear=(?) where NFToken=(?);";
+                    query.values=[attr.interpret, attr.name, attr.lenght, attr.year, attr.token];
                     break;
                 default:
                     res.send("command unknown")
