@@ -16,6 +16,7 @@ function AdminNfts(props) {
     const year = useRef(null);
     const lenght = useRef(null);
     const sub = useRef(null);
+    const search = useRef(null)
 
     useEffect(() => {
         axios.post(props.domain + "/admin/check", {user: cookies.name, pwd: cookies.pwd, attributes: {}})
@@ -32,9 +33,23 @@ function AdminNfts(props) {
             })
     }, [])
 
+    const update_values = (typ, value) =>{
+        switch (typ){
+            case "search":
+                axios.post(props.domain+"/nft_search", {search: value}).then((res)=>{
+                    changeNFTs(res.data);
+                    })
+                break;
+            case "normal":
+                axios.post(props.domain + "/admin/nfts", {user: cookies.name, pwd: cookies.pwd}).then((res) => {
+                    changeNFTs(res.data);
+                })
+                break;
+        }
+    }
     const new_nft = () => {
-        //sub.current.setAttribute("disabled", true)
-        //changeTrigger(false);
+        sub.current.setAttribute("disabled", true)
+        changeTrigger(false);
         axios.post(props.domain + "/admin/add_nft", {
             user: cookies.name,
             pwd: cookies.pwd,
@@ -44,21 +59,50 @@ function AdminNfts(props) {
                 length: "00:" + lenght.current.value.toString(),
                 year: year.current.value
             }
-        }).then(
-            () => {
-                alert("NFT was added...")
+        }).then((res) => {
+                //alert("NFT was added...")
                 sub.current.removeAttribute("disabled")
-            }
-        )
+                update_values("normal")
+        })
     }
-    const delete_nft = token =>{
+    const delete_nft = token => {
         changeTrigger(false);
-        axios.post(props.domain+"/admin/delete_nft", {user: cookies.name, pwd: cookies.pwd, attributes: {token:token}})
-             .then(()=>{
-                 alert("NFT is deleted");
-             })
+        axios.post(props.domain + "/admin/delete_nft", {
+            user: cookies.name,
+            pwd: cookies.pwd,
+            attributes: {token: token}
+        })
+            .then(() => {
+                //alert("NFT is deleted");
+                update_values("normal")
+            })
     }
-    const edit_nft = nft =>{
+    const update_nft = (nft) =>{
+        changeTrigger(false)
+        console.log({
+            token: nft.NFToken,
+            name: name.current.value!=="" ? name.current.value : nft.NFName,
+            interpret: interpret.current.value!=="" ? interpret.current.value : nft.NFInterpret,
+            lenght: lenght.current.value!=="" ? lenght.current.value : nft.NFLength,
+            year: year.current.value!=="" ? year.current.value : nft.NFYear
+        })
+        axios.post(props.domain + "/admin/edit_nft", {
+            user: cookies.name,
+            pwd: cookies.pwd,
+            attributes: {
+                token: nft.NFToken,
+                name: name.current.value!=="" ? name.current.value : nft.NFName,
+                interpret: interpret.current.value!=="" ? interpret.current.value : nft.NFInterpret,
+                lenght: lenght.current.value!=="" ? lenght.current.value : nft.NFLength,
+                year: year.current.value!=="" ? year.current.value : nft.NFYear
+            }
+        })
+            .then(() => {
+                //alert("NFT was changed")
+                update_values("normal")
+            })
+    }
+    const edit_nft = nft => {
         changeValue(
             <div>
                 <h3>Edit NFT</h3>
@@ -79,16 +123,12 @@ function AdminNfts(props) {
                     <Form.Label>Song length</Form.Label>
                     <Form.Control ref={lenght} type="time" placeholder="Enter length"/>
                 </Form.Group>
-                <Button ref={sub} variant="primary" type="button" onClick={new_nft}>
+                <Button ref={sub} variant="primary" type="button" onClick={() => update_nft(nft)}>
                     Submit
                 </Button>
             </div>
         )
-        changeTrigger(false)
-        axios.post(props.domain+"/admin/edit_nft", {user: cookies.name, pwd: cookies.pwd, attributes: {token: nft.NFToken, name: name.current.value?name.current.value:nft.NFName, interpret: interpret.current.value?interpret.current.value:nft.NFInterpret, lenght: lenght.current.value?lenght.current.value:nft.NFLength, year:year.current.value?year.current.value:nft.NFYear}})
-             .then(()=>{
-                 alert("NFT was changed")
-             })
+        changeTrigger(true)
     }
     const add_nft = () => {
         changeValue(
@@ -101,7 +141,7 @@ function AdminNfts(props) {
                     </Form.Group>
                     <Form.Group className="mb-3">
                         <Form.Label>Song name</Form.Label>
-                        <Form.Control ref={name} type="text" placeholder="Enter song name"/>
+                        <Form.Control ref={name} type="text" placeholder="Enter song name" aria-required/>
                     </Form.Group>
                     <Form.Group className="mb-3">
                         <Form.Label>Year</Form.Label>
@@ -109,7 +149,7 @@ function AdminNfts(props) {
                     </Form.Group>
                     <Form.Group className="mb-3">
                         <Form.Label>Song length</Form.Label>
-                        <Form.Control ref={lenght} type="time" placeholder="Enter length"/>
+                        <Form.Control ref={lenght} type="time" placeholder="Enter length" aria-required/>
                     </Form.Group>
                     <Button ref={sub} variant="primary" type="button" onClick={new_nft}>
                         Submit
@@ -122,8 +162,8 @@ function AdminNfts(props) {
     const nftHandler = e => {
         console.log(e.currentTarget.id)
         let nft = {};
-        for(let d of nfts){
-            if(d.NFToken === e.currentTarget.id){
+        for (let d of nfts) {
+            if (d.NFToken === e.currentTarget.id) {
                 nft = d;
                 break;
             }
@@ -153,8 +193,8 @@ function AdminNfts(props) {
                     <div className="col-9">{nft.NFLength}</div>
                 </div>
                 <div className="row">
-                    <button className="btn btn-primary m-1" onClick={()=>delete_nft(nft.NFToken)}>Delete</button>
-                    <button className="btn btn-primary m-1" onClick={()=>edit_nft(nft)}>Edit</button>
+                    <button className="btn btn-primary m-1" onClick={() => delete_nft(nft.NFToken)}>Delete</button>
+                    <button className="btn btn-primary m-1" onClick={() => edit_nft(nft)}>Edit</button>
                 </div>
             </div>
         )
@@ -167,7 +207,16 @@ function AdminNfts(props) {
                 <div className="mt-4">
                     <h3>NFTs admin panel</h3>
                     <div className="row">
-                        <button className="btn btn-info" onClick={add_nft}>add nft</button>
+                        <div className="col-2">
+                            <button className="btn btn-outline-info" onClick={add_nft}>add nft</button>
+                        </div>
+                        <div className="col-2"></div>
+                        <div className="col-6">
+                            <input type="text" ref={search} className="form-control" placeholder="Search"/>
+                        </div>
+                        <div className="col-2">
+                            <button className="btn btn-outline-info" onClick={()=>update_values("search", search.current.value)}>Search</button>
+                        </div>
                     </div>
                     <div className="row">
                         <h5>All NFTs</h5>
@@ -182,9 +231,9 @@ function AdminNfts(props) {
                             </tr>
                             </thead>
                             <tbody>
-                            {nfts?nfts.map((d, key)=>{
-                                return(
-                                    <tr key={key+"_"+d.NFToken+"_admin_nfts"} id={d.NFToken} onClick={e=>nftHandler(e)}>
+                            {nfts ? nfts.map((d, key) => {
+                                return (
+                                    <tr key={key + "_" + d.NFToken + "_admin_nfts"} id={d.NFToken} onClick={e => nftHandler(e)}>
                                         <td>{d.NFToken}</td>
                                         <td>{d.NFName}</td>
                                         <td>{d.NFInterpret}</td>
@@ -192,7 +241,9 @@ function AdminNfts(props) {
                                         <td>{d.NFYear}</td>
                                     </tr>
                                 );
-                            }):<tr><td colSpan={5}>Loading</td></tr>}
+                            }) : <tr>
+                                <td colSpan={5}>Loading</td>
+                            </tr>}
                             </tbody>
                         </table>
                     </div>
@@ -202,7 +253,8 @@ function AdminNfts(props) {
                 </Popup>
             </>
         );
-    } else if (loading) {
+    }
+    else if (loading) {
         return (
             <div className="mt-4">
                 <h3>Loading</h3>

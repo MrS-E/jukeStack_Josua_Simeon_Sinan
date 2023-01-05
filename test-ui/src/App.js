@@ -8,7 +8,7 @@ import { useCookies } from 'react-cookie';
 
 function App() { //TESTED
     const [cookies, setCookie] = useCookies(['user']);
-    const domain = "http://192.168.24.141:5000"; //FIXME
+    const domain = "http://192.168.1.107:5000"; //FIXME
     const user_ref = useRef(null);
     const pwd_ref = useRef(null);
     const sub_ref = useRef(null);
@@ -206,7 +206,7 @@ function App() { //TESTED
                                         </div>
                                         <span className="text-right text-danger mt-2">{failed}</span>
                                         <p className="forgot-password text-right mt-2">
-                                            Forgot <a href="#">password?</a> {/*TODO forget password*/}
+                                            {/*3Forgot <a href="#">password?</a> {/*TODO forget password*/}
                                         </p>
                                     </div>
                                 </div>
