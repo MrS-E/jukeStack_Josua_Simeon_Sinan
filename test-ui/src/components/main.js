@@ -8,9 +8,6 @@ import Admin from "./admin/admin";
 
 function Main(props) {
     const [navlink, changeNavlink] = useState("");
-    if(props.admin){
-        changeNavlink(<NavLink eventKey={4} as={Link} to="/admin">Admin</NavLink>)
-    }
     return (
         <div>
             <BrowserRouter>
