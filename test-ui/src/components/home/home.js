@@ -8,12 +8,8 @@ function Home(props) {
     const {data, loading} = usePost(domain+"/lendings", {user: cookies.name, pwd:cookies.pwd})
     if(data){
         return (
-            <div>
+            <div className="mt-4">
                 <h1>Home</h1>
-                <div className="row mt-4">
-                    <h3>Signed in as user:</h3>
-                    <p><strong>{cookies.name}</strong></p>
-                </div>
                 <div className="row mt-4">
                     <h3>Currently on lending</h3>
                     <table className="table table-hover">
@@ -45,13 +41,13 @@ function Home(props) {
         )
     }else if(loading){
         return(
-            <div>
+            <div className="mt-4">
                 <h1>Loading</h1>
             </div>
         );
     }else {
         return (
-            <div>
+            <div className="mt-4">
                 <h1>Successful login</h1>
             </div>
         );

@@ -8,7 +8,7 @@ import { useCookies } from 'react-cookie';
 
 function App() { //TESTED
     const [cookies, setCookie] = useCookies(['user']);
-    const domain = "http://localhost:5000";
+    const domain = "http://192.168.1.107:5000"; //FIXME
     const user_ref = useRef(null);
     const pwd_ref = useRef(null);
     const sub_ref = useRef(null);
@@ -19,6 +19,14 @@ function App() { //TESTED
     const [login, changeLogin] = useState(false);
     const [failed, changeFailed] = useState("");
     const [admin, changeAdmin] = useState(false);
+
+    useEffect(()=>{
+        if(cookies.name && cookies.pwd){
+            changeNoRender(true);
+            changeUser(cookies.name);
+            changePasswd(cookies.pwd);
+        }
+    },[])
 
     useEffect(() => {
         if (noRender){
@@ -83,6 +91,7 @@ function App() { //TESTED
             })
             .catch();
     }
+
     if (!login) { //TESTED
         return (
             <div>
@@ -109,13 +118,13 @@ function App() { //TESTED
                                             <input
                                                 name="sal"
                                                 type="radio"
-                                                className="form-check-input mt-1"                                            checked={salu === "Sir"}
+                                                className="form-check-input m-1"                                            checked={salu === "Sir"}
                                                 onChange={()=>onOptionChange("Sir")}/>
                                             <span>Sir</span><br/>
                                             <input
                                                 name="sal"
                                                 type="radio"
-                                                className="form-check-input mt-1"                                            checked={salu === "Madam"}
+                                                className="form-check-input m-1"                                            checked={salu === "Madam"}
                                                 onChange={()=>onOptionChange("Madam")}/>
                                             <span>Madam</span><br/>
                                         </div>
@@ -197,7 +206,7 @@ function App() { //TESTED
                                         </div>
                                         <span className="text-right text-danger mt-2">{failed}</span>
                                         <p className="forgot-password text-right mt-2">
-                                            Forgot <a href="#">password?</a> {/*TODO forget password*/}
+                                            {/*3Forgot <a href="#">password?</a> {/*TODO forget password*/}
                                         </p>
                                     </div>
                                 </div>

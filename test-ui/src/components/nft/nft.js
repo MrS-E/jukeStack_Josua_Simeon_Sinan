@@ -27,7 +27,6 @@ function Nft(props) {
     },[reload])
 
     const lend = id =>{
-        console.log(id);
         axios.post(props.domain+"/lend",{NFToken:id, mail:cookies.name, pwd:cookies.pwd}).then(
             (response)=>{
                 if(response.data.message){
@@ -91,7 +90,6 @@ function Nft(props) {
         changeReload(false)
         let nft={};
         for(let d of d_lent.lending){
-            console.log(d.LenId);
             if(d.LenId.toString() === e.currentTarget.id.toString()){
                 nft=d;
                 break;

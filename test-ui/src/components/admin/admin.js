@@ -6,24 +6,29 @@ import Accordion from "react-bootstrap/Accordion";
 function Admin(props) {
     const [cookies, setCookie] = useCookies(['user']);
     const [checked, changeCheck] = useState(false);
+    const [loading, changeLoading] = useState(true);
     const [users, changeUsers] = useState([])
     const [lendings, changeLend] = useState([])
     const [nfts, changeNFTs] = useState([])
 
     useEffect( ()=> {
-        axios.post(props.domain + "/admin", {user: cookies.name, pwd: cookies.pwd, command: "check", attributes: {}})
+        axios.post(props.domain + "/admin/check", {user: cookies.name, pwd: cookies.pwd, attributes: {}})
              .then((res_check)=>{
-                 changeCheck(res_check.data.result[0].admin)
-                if(res_check.data.result[0].admin){
-                    axios.post(props.domain+"/admin", {user:cookies.name, pwd:cookies.pwd, command:"all_user", attributes:{}})
-                         .then((res_users)=>{ changeUsers(res_users.data.result)})
-                    axios.post(props.domain+"/admin", {user:cookies.name, pwd:cookies.pwd, command:"lending", attributes:{}})
-                         .then((res_rents)=>{ changeLend(res_rents.data.result)})
-                    axios.post(props.domain+"/admin", {user:cookies.name, pwd:cookies.pwd, command:"all_ntfs", attributes:{}})
-                         .then((res_ntfs)=>{ changeNFTs(res_ntfs.data.results)})
-                }
+                 changeCheck(res_check.data[0].admin==="true"?true:false);
+                 changeLoading(false)
         })
     },[])
+
+    useEffect(()=>{
+        if(checked){
+            axios.post(props.domain+"/admin/all_users", {user:cookies.name, pwd:cookies.pwd,  attributes:{}})
+                .then((res_users)=>{ changeUsers(res_users.data)})
+            axios.post(props.domain+"/admin/lendings", {user:cookies.name, pwd:cookies.pwd, attributes:{}})
+                .then((res_rents)=>{ changeLend(res_rents.data)})
+            axios.post(props.domain+"/admin/nfts", {user:cookies.name, pwd:cookies.pwd, attributes:{}})
+                .then((res_ntfs)=>{ changeNFTs(res_ntfs.data)})
+        }
+    }, [checked])
 
     const userHandler = e => {
         console.log(e.currentTarget.id)
@@ -37,12 +42,12 @@ function Admin(props) {
         console.log(e.currentTarget.id)
     }
 
-    if(checked) {
+    if(checked && !loading) {
         return (
-            <div>
+            <div className="mt-4">
                 <h3>Admin</h3>
                 <Accordion defaultActiveKey="0">
-                    <Accordion.Item eventKey="0">
+                    <Accordion.Item eventKey="1">
                         <Accordion.Header>All users</Accordion.Header>
                         <Accordion.Body>
                             <div className="overflow-auto h-50">
@@ -57,7 +62,7 @@ function Admin(props) {
                                     </tr>
                                     </thead>
                                     <tbody>
-                                        {users.map((d, key)=>{
+                                        {users?users.map((d, key)=>{
                                             return(
                                                 <tr key={key+d.UsMail} id={d.UsMail} onClick={e=>userHandler(e)}>
                                                     <td>{d.UsSalutation}</td>
@@ -67,20 +72,19 @@ function Admin(props) {
                                                     <td>{d.UsRole}</td>
                                                 </tr>
                                             );
-                                        })}
+                                        }):<tr><td colSpan={5}>Loading</td></tr>}
                                     </tbody>
                                 </table>
                             </div>
                         </Accordion.Body>
                     </Accordion.Item>
-                    <Accordion.Item eventKey="1">
+                    <Accordion.Item eventKey="2">
                         <Accordion.Header>All rents</Accordion.Header>
                         <Accordion.Body>
                             <div className="overflow-auto h-50">
                                 <table className="table table-hover">
                                     <thead>
                                     <tr>
-                                        <th>id</th>
                                         <th>user</th>
                                         <th>token</th>
                                         <th>start</th>
@@ -88,23 +92,22 @@ function Admin(props) {
                                     </tr>
                                     </thead>
                                     <tbody>
-                                    {lendings.map((d, key)=>{
+                                    {lendings?lendings.map((d, key)=>{
                                         return(
-                                            <tr key={key+d.LenId} id={d.LenId} onClick={e=>lendHandler(e)}>
-                                                <td>{d.LenId}</td>
+                                            <tr key={key+"_"+d.LenId+"_admin"} id={d.LenId} onClick={e=>lendHandler(e)}>
                                                 <td>{d.UsMail}</td>
                                                 <td>{d.NFToken}</td>
                                                 <td>{d.LenStart}</td>
                                                 <td>{d.LenEnd}</td>
                                             </tr>
                                         );
-                                    })}
+                                    }):<tr><td colSpan={4}>Loading</td></tr>}
                                     </tbody>
                                 </table>
                             </div>
                         </Accordion.Body>
                     </Accordion.Item>
-                    <Accordion.Item eventKey="2">
+                    <Accordion.Item eventKey="3">
                         <Accordion.Header>All NFTs</Accordion.Header>
                         <Accordion.Body>
                             <div className="overflow-auto h-50">
@@ -119,7 +122,7 @@ function Admin(props) {
                                     </tr>
                                     </thead>
                                     <tbody>
-                                    {nfts.map((d, key)=>{
+                                    {nfts?nfts.map((d, key)=>{
                                         return(
                                             <tr key={key+d.NFToken} id={d.NFToken} onClick={e=>nftHandler(e)}>
                                                 <td>{d.NFToken}</td>
@@ -129,7 +132,7 @@ function Admin(props) {
                                                 <td>{d.NFYear}</td>
                                             </tr>
                                         );
-                                    })}
+                                    }):<tr><td colSpan={5}>Loading</td></tr>}
                                     </tbody>
                                 </table>
                             </div>
@@ -138,9 +141,17 @@ function Admin(props) {
                 </Accordion>
             </div>
         );
-    }else{
+    }
+    else if(loading){
+        return (
+            <div className="mt-4">
+                <h3>Loading</h3>
+            </div>
+        )
+    }
+    else{
         return(
-            <div>
+            <div className="mt-4">
                 <h3>You are a bit misguided, please go back to the normal sites.</h3>
             </div>
         );
