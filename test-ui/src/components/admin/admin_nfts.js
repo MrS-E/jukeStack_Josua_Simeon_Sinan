@@ -57,7 +57,7 @@ function AdminNfts(props) {
                 interpret: interpret.current.value,
                 name: name.current.value,
                 length: "00:" + lenght.current.value.toString(),
-                year: year.current.value
+                year: year.current.value.toString().length===4?year.current.value:year.current.value===3?"0"+year.current.value.toString():year.current.value===2?"00"+year.current.value.toString():year.current.value===1?"000"+year.current.value.toString():"0000"
             }
         }).then((res) => {
                 //alert("NFT was added...")
@@ -94,7 +94,7 @@ function AdminNfts(props) {
                 name: name.current.value!=="" ? name.current.value : nft.NFName,
                 interpret: interpret.current.value!=="" ? interpret.current.value : nft.NFInterpret,
                 lenght: lenght.current.value!=="" ? lenght.current.value : nft.NFLength,
-                year: year.current.value!=="" ? year.current.value : nft.NFYear
+                year: year.current.value.toString().length===4?year.current.value:year.current.value===3?"0"+year.current.value.toString():year.current.value===2?"00"+year.current.value.toString():year.current.value===1?"000"+year.current.value.toString():"0000"
             }
         })
             .then(() => {
@@ -109,19 +109,19 @@ function AdminNfts(props) {
                 <p>Keep input empty if you want keep data</p>
                 <Form.Group className="mb-3">
                     <Form.Label>Interpret</Form.Label>
-                    <Form.Control ref={interpret} type="text" placeholder="Enter interpret"/>
+                    <Form.Control ref={interpret} type="text" placeholder={nft.NFInterpret}/>
                 </Form.Group>
                 <Form.Group className="mb-3">
                     <Form.Label>Song name</Form.Label>
-                    <Form.Control ref={name} type="text" placeholder="Enter song name"/>
+                    <Form.Control ref={name} type="text" placeholder={nft.NFName}/>
                 </Form.Group>
                 <Form.Group className="mb-3">
                     <Form.Label>Year</Form.Label>
-                    <Form.Control ref={year} type="number" min="1000" max="9999" placeholder="2023"/>
+                    <Form.Control ref={year} type="number" min="1000" max="9999" placeholder={nft.NFYear}/>
                 </Form.Group>
                 <Form.Group className="mb-3">
                     <Form.Label>Song length</Form.Label>
-                    <Form.Control ref={lenght} type="time" placeholder="Enter length"/>
+                    <Form.Control ref={lenght} type="time" placeholder={nft.NFLength}/>
                 </Form.Group>
                 <Button ref={sub} variant="primary" type="button" onClick={() => update_nft(nft)}>
                     Submit
@@ -145,11 +145,11 @@ function AdminNfts(props) {
                     </Form.Group>
                     <Form.Group className="mb-3">
                         <Form.Label>Year</Form.Label>
-                        <Form.Control ref={year} type="number" min="1000" max="9999" placeholder="2023"/>
+                        <Form.Control ref={year} type="numbers" aria-valuemin="1000" aria-valuemax="9999" placeholder="2023" aria-required/>
                     </Form.Group>
                     <Form.Group className="mb-3">
                         <Form.Label>Song length</Form.Label>
-                        <Form.Control ref={lenght} type="time" placeholder="Enter length" aria-required/>
+                        <Form.Control ref={lenght} type="time" placeholder="Enter length" aria-valuemin="00:01" aria-required/>
                     </Form.Group>
                     <Button ref={sub} variant="primary" type="button" onClick={new_nft}>
                         Submit
@@ -208,18 +208,18 @@ function AdminNfts(props) {
                     <h3>NFTs admin panel</h3>
                     <div className="row">
                         <div className="col-2">
-                            <button className="btn btn-outline-info" onClick={add_nft}>add nft</button>
+                            <button className="btn btn-outline-info" onClick={add_nft}>Add NFT</button>
                         </div>
                         <div className="col-2"></div>
                         <div className="col-6">
                             <input type="text" ref={search} className="form-control" placeholder="Search"/>
                         </div>
-                        <div className="col-2">
+                        <div className="col-2 float-end">
                             <button className="btn btn-outline-info" onClick={()=>update_values("search", search.current.value)}>Search</button>
                         </div>
                     </div>
                     <div className="row">
-                        <h5>All NFTs</h5>
+                        <div className="col-12">
                         <table className="table table-hover">
                             <thead>
                             <tr>
@@ -246,6 +246,7 @@ function AdminNfts(props) {
                             </tr>}
                             </tbody>
                         </table>
+                        </div>
                     </div>
                 </div>
                 <Popup trigger={trigger} changeTrigger={changeTrigger}>
