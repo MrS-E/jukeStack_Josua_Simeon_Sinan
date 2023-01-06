@@ -237,8 +237,8 @@ app.post("/update", (req, res) => { //TESTED
     );
 }) //
 app.post("/nft_search", (req, res) => {
-    const search = "%" + req.body.search + "%";
-    db.query("select *  from TNFTSongs where NFToken like (?) or NFName like (?) or NFInterpret like (?) or NFYear like (?)", [search, search, search, search], (err, response) => {
+    const search = req.body.search;
+    db.query("select * from TNFTSongs where locate ((?), NFToken) or locate ((?), NFInterpret) or locate ((?), NFName) or locate ((?), NFYear);", [search, search, search, search], (err, response) => {
         if (err) {
             console.log("search error: ", err);
         } else {
@@ -295,14 +295,16 @@ app.post("/admin/:action", (req, res) => {
                     query.sql = "select * from TUsers;";
                     break;
                 case "user_search":
-                    const search = "%"+attr.search+"%";
-                    query.sql = "select * from TUsers where UsMail like (?) or UsFName like (?) or UsSName like (?) or UsSalutation like (?) or UsRole like (?);";
-                    query.values = [search,search,search,search,search];
-
+                    query.sql = "select * from TUsers where locate ((?), UsMail) or locate ((?), UsFName) or locate ((?), UsSName) or locate ((?), UsSalutation) or locate ((?), UsMail);";
+                    query.values = [attr.search,attr.search,attr.search,attr.search,attr.search];
                     break;
                 case "admin":
                     query.sql = "update TUsers set UsRole='admin' where UsMail=(?);";
                     query.values = [attr.mail]
+                    break;
+                case "lendings_search":
+                    query.sql = "select LenId,UsMail, NFToken, NFName, NFInterpret, concat(date_format(LenStart, '%d.%m.%Y'),' ', time_format(LenStart, '%H:%i:%s')) as LenDateStart, concat(date_format(LenEnd, '%d.%m.%Y'),' ', time_format(LenEnd, '%H:%i:%s')) as LenDateEnd from TLendings natural join TNFTSongs where locate ((?), LenId) or locate ((?), UsMail) or locate ((?), NFToken) or locate ((?), LenStart) or locate ((?), LenEnd) order by LenStart desc;";
+                    query.values = [attr.search,attr.search,attr.search,attr.search,attr.search];
                     break;
                 case "remove_user": // remove user admin tool
                     deleteUser(attr.usMail);
@@ -405,19 +407,18 @@ app.post("/admin/:action", (req, res) => {
         }
     })
 })
-schedule.scheduleJob('0 0 * * *', () => { //runs every 24h at 0:0 // when is a lending expired? extra function!
-    db.query("select datediff(LenStart, now()) as days from TLendings",
+schedule.scheduleJob('0 0 0 * * *', () => { //runs every 24h at 0:0 // when is a lending expired? extra function!
+    console.log("SCHEDULE JOB STARTED");
+    db.query("select datediff(now(), LenStart) as days, LenEnd, LenId from TLendings",
         (err, result) => {
             if (err) {
                 console.log("Schedule error: ", err);
             } else {
                 result.forEach((d) => {
-                    if(d.days > 30) {
-
-                        db.query("update TLendings set LenEnd = now()",
+                    if(d.days > 30 && d.LenEnd === null) {
+                        db.query("update TLendings set LenEnd = now() where LenId = (?)",
                             [d.LenId],
                             (err) => {
-                                console.log("removed");
                                 if (err) {
                                     console.log("Schedule error: ", err);
                                 }
@@ -426,6 +427,7 @@ schedule.scheduleJob('0 0 * * *', () => { //runs every 24h at 0:0 // when is a l
                 });
             }
         });
+    console.log("SCHEDULE JOB FINISHED")
 });
 
 const listener = app.listen(process.env.PORT || require("./variables").PORT, () => {
