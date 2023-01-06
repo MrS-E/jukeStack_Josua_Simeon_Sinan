@@ -10,9 +10,9 @@ app.use(cors());
 app.use(express.json()); //to manage the parsing of the body from react app
 
 const db = mysql.createConnection({ //DB Connection
-    user: /*"jukSiSiJo"*/ "root",
-    host: /*"i-kf.ch"*/ "localhost",
-    password: /*process.env.DB_KEY || require("./variables").DB_KEY*/ "", //careful key is in not sync file "keys.env" like (DB_KEY="...")
+    user: "jukSiSiJo",
+    host: "i-kf.ch",
+    password: process.env.DB_KEY || require("./variables").DB_KEY, //careful key is in not sync file "keys.env" like (DB_KEY="...")
     database: "jukeStackDB_SimeonSinanJosua",
 });
 db.connect((err) => {
@@ -230,6 +230,7 @@ app.post("/update", (req, res) => { //TESTED
                 console.log("update error: ", Date.now(), ":", err);
                 res.send({update: false, error: err})
             } else {
+                console.log(result);
                 res.send({update: true, result: result});
             }
         }
@@ -244,6 +245,34 @@ app.post("/nft_search", (req, res) => {
             res.send(response);
         }
     })
+});
+function deleteUser(mail) {
+    // return all active lendings
+    db.query("select NFToken from TLendings where UsMail = (?)", [mail], (err, res) => {
+        for(let i = 0; i < res; i++) {
+            console.log("Remove User; select Lendings error: ", err);
+            db.query("delete from TLendings where NFToken = (?)", [res[i]], (err) => {
+                if(err) {
+                    console.log("Remove User; remove Lendings error: ", err);
+                }
+            })
+        }
+    })
+    // delete the user
+    db.query("delete from TUsers where UsMail = (?)", [mail], (err) => {
+        if(err) {
+            console.log("Delete User error: ", err);
+        }
+    })
+}
+
+app.post("/remove_user", (req,res) => { //remove user tool for the user
+    const user = req.body.user;
+    const pwd = req.body.pwd;
+    axios.post(domain + "/login", {mail: user, password: pwd}).then(() => {
+        deleteUser(user);
+    })
+    res.send("YOU ARE DELETED, NEVER COME BACK!");
 });
 app.post("/admin/:action", (req, res) => {
     const user = req.body.user;
@@ -263,13 +292,31 @@ app.post("/admin/:action", (req, res) => {
                 case "all_users":
                     query.sql = "select * from TUsers;";
                     break;
-                case "user":
-                    query.sql = "select * from TUsers where UsMail=(?);";
-                    query.values = [attr.mail];
+                case "user_search":
+                    const search = "%"+req.body.search+"%";
+                    query.sql = "select * from TUsers where UsMail like (?);";
+                    query.values = [search];
                     break;
                 case "admin":
                     query.sql = "update TUsers set UsRole='admin' where UsMail=(?);";
                     query.values = [attr.mail]
+                    break;
+                case "remove_user": // remove user admin tool
+                    deleteUser(attr.usMail);
+                    break;
+                case "appoint_admin":
+                    db.query("update TUsers set UsRole = 'admin' where UsMail = (?)", [attr.usMail], (err) =>{
+                        if(err) {
+                            console.log("Appoint Admin: ", err)
+                        }
+                    })
+                    break;
+                case "remove_Admin":
+                    db.query("update TUSers set UsRole = 'user' where UsMail = (?)", [attr.usMail], (err) => {
+                        if(err){
+                            console.log("Remove Admin error: ", err);
+                        }
+                    })
                     break;
                 case "lendings":
                     query.sql = "select * from TLendings order by LenStart desc;";
