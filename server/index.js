@@ -237,8 +237,8 @@ app.post("/update", (req, res) => { //TESTED
     );
 }) //
 app.post("/nft_search", (req, res) => {
-    const search = "%" + req.body.search + "%";
-    db.query("select *  from TNFTSongs where NFToken like (?) or NFName like (?) or NFInterpret like (?) or NFYear like (?)", [search, search, search, search], (err, response) => {
+    const search = req.body.search;
+    db.query("select * from TNFTSongs where locate ((?), NFToken) or locate ((?), NFInterpret) or locate ((?), NFName) or locate ((?), NFYear);", [search, search, search, search], (err, response) => {
         if (err) {
             console.log("search error: ", err);
         } else {
@@ -249,8 +249,10 @@ app.post("/nft_search", (req, res) => {
 function deleteUser(mail) {
     // return all active lendings
     db.query("select NFToken from TLendings where UsMail = (?)", [mail], (err, res) => {
-        for(let i = 0; i < res; i++) {
+        if(err) {
             console.log("Remove User; select Lendings error: ", err);
+        }
+        for(let i = 0; i < res; i++) {
             db.query("delete from TLendings where NFToken = (?)", [res[i]], (err) => {
                 if(err) {
                     console.log("Remove User; remove Lendings error: ", err);
@@ -293,33 +295,31 @@ app.post("/admin/:action", (req, res) => {
                     query.sql = "select * from TUsers;";
                     break;
                 case "user_search":
-                    const search = "%"+req.body.search+"%";
-                    query.sql = "select * from TUsers where UsMail like (?);";
-                    query.values = [search];
+                    query.sql = "select * from TUsers where locate ((?), UsMail) or locate ((?), UsFName) or locate ((?), UsSName) or locate ((?), UsSalutation) or locate ((?), UsMail);";
+                    query.values = [attr.search,attr.search,attr.search,attr.search,attr.search];
                     break;
                 case "admin":
                     query.sql = "update TUsers set UsRole='admin' where UsMail=(?);";
                     query.values = [attr.mail]
                     break;
+                case "lendings_search":
+                    query.sql = "select LenId,UsMail, NFToken, NFName, NFInterpret, concat(date_format(LenStart, '%d.%m.%Y'),' ', time_format(LenStart, '%H:%i:%s')) as LenDateStart, concat(date_format(LenEnd, '%d.%m.%Y'),' ', time_format(LenEnd, '%H:%i:%s')) as LenDateEnd from TLendings natural join TNFTSongs where locate ((?), LenId) or locate ((?), UsMail) or locate ((?), NFToken) or locate ((?), LenStart) or locate ((?), LenEnd) order by LenStart desc;";
+                    query.values = [attr.search,attr.search,attr.search,attr.search,attr.search];
+                    break;
                 case "remove_user": // remove user admin tool
                     deleteUser(attr.usMail);
+                    res.send("User deleted");
                     break;
                 case "appoint_admin":
-                    db.query("update TUsers set UsRole = 'admin' where UsMail = (?)", [attr.usMail], (err) =>{
-                        if(err) {
-                            console.log("Appoint Admin: ", err)
-                        }
-                    })
+                    query.sql = "update TUsers set UsRole = 'admin' where UsMail = (?)";
+                    query.values = [attr.usMail];
                     break;
-                case "remove_Admin":
-                    db.query("update TUSers set UsRole = 'user' where UsMail = (?)", [attr.usMail], (err) => {
-                        if(err){
-                            console.log("Remove Admin error: ", err);
-                        }
-                    })
+                case "remove_admin":
+                    query.sql = "update TUsers set UsRole = 'user' where UsMail = (?)";
+                    query.values = [attr.usMail];
                     break;
                 case "lendings":
-                    query.sql = "select * from TLendings order by LenStart desc;";
+                    query.sql = "select LenId,UsMail, NFToken, NFName, NFInterpret, concat(date_format(LenStart, '%d.%m.%Y'),' ', time_format(LenStart, '%H:%i:%s')) as LenDateStart, concat(date_format(LenEnd, '%d.%m.%Y'),' ', time_format(LenEnd, '%H:%i:%s')) as LenDateEnd from TLendings natural join TNFTSongs order by LenStart desc;";
                     break;
                 case "remove_lend":
                     query.sql = "update TLendings set LenEnd = now() where LenId=(?);";
@@ -407,23 +407,27 @@ app.post("/admin/:action", (req, res) => {
         }
     })
 })
-schedule.scheduleJob('0 0 * * *', () => { //runs every 24h at 0:0 // when is a lending expired? extra function!
-    db.query("", //TODO (Joscupe) select all lendings which have expired or which have no end date (would be nice if start date = 5 days in the past (if not additions are needed by (MrS-E)))
+schedule.scheduleJob('0 0 0 * * *', () => { //runs every 24h at 0:0 // when is a lending expired? extra function!
+    console.log("SCHEDULE JOB STARTED");
+    db.query("select datediff(now(), LenStart) as days, LenEnd, LenId from TLendings",
         (err, result) => {
             if (err) {
                 console.log("Schedule error: ", err);
             } else {
                 result.forEach((d) => {
-                    db.query("", //TODO (Joscupe) update lending with end date -> if deletion additions are needed here by (MrS-E & Joscupe)
-                        [d.LenId],
-                        (err) => {
-                            if (err) {
-                                console.log("Schedule error: ", err);
-                            }
-                        });
+                    if(d.days > 30 && d.LenEnd === null) {
+                        db.query("update TLendings set LenEnd = now() where LenId = (?)",
+                            [d.LenId],
+                            (err) => {
+                                if (err) {
+                                    console.log("Schedule error: ", err);
+                                }
+                            });
+                    }
                 });
             }
         });
+    console.log("SCHEDULE JOB FINISHED")
 });
 
 const listener = app.listen(process.env.PORT || require("./variables").PORT, () => {
