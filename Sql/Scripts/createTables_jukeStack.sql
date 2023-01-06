@@ -11,6 +11,7 @@ History:
 Version	Date		Who	Changes
 1.0  	2022-12-13	JP	created
 1.1		2023-01-02	JP	added UsRole to TUsers
+1.2		2023-01-06	JP increased autoincremnt of TLendings
 
 Copyright ©2022 Josua Panzera
 */
@@ -33,7 +34,7 @@ create table TLendings (
     LenEnd timestamp,
     NFToken char(16) not null,
     UsMail varchar(55) not null
-)auto_increment = 1000000;
+)auto_increment = 100000000;
 -- Table TNFTSongs
 drop table if exists TNFTSongs;
 create table TNFTSongs (
