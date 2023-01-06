@@ -249,8 +249,10 @@ app.post("/nft_search", (req, res) => {
 function deleteUser(mail) {
     // return all active lendings
     db.query("select NFToken from TLendings where UsMail = (?)", [mail], (err, res) => {
-        for(let i = 0; i < res; i++) {
+        if(err) {
             console.log("Remove User; select Lendings error: ", err);
+        }
+        for(let i = 0; i < res; i++) {
             db.query("delete from TLendings where NFToken = (?)", [res[i]], (err) => {
                 if(err) {
                     console.log("Remove User; remove Lendings error: ", err);
@@ -293,9 +295,10 @@ app.post("/admin/:action", (req, res) => {
                     query.sql = "select * from TUsers;";
                     break;
                 case "user_search":
-                    const search = "%"+req.body.search+"%";
-                    query.sql = "select * from TUsers where UsMail like (?);";
-                    query.values = [search];
+                    const search = "%"+attr.search+"%";
+                    query.sql = "select * from TUsers where UsMail like (?) or UsFName like (?) or UsSName like (?) or UsSalutation like (?) or UsRole like (?);";
+                    query.values = [search,search,search,search,search];
+
                     break;
                 case "admin":
                     query.sql = "update TUsers set UsRole='admin' where UsMail=(?);";
@@ -303,20 +306,15 @@ app.post("/admin/:action", (req, res) => {
                     break;
                 case "remove_user": // remove user admin tool
                     deleteUser(attr.usMail);
+                    res.send("User deleted");
                     break;
                 case "appoint_admin":
-                    db.query("update TUsers set UsRole = 'admin' where UsMail = (?)", [attr.usMail], (err) =>{
-                        if(err) {
-                            console.log("Appoint Admin: ", err)
-                        }
-                    })
+                    query.sql = "update TUsers set UsRole = 'admin' where UsMail = (?)";
+                    query.values = [attr.usMail];
                     break;
-                case "remove_Admin":
-                    db.query("update TUSers set UsRole = 'user' where UsMail = (?)", [attr.usMail], (err) => {
-                        if(err){
-                            console.log("Remove Admin error: ", err);
-                        }
-                    })
+                case "remove_admin":
+                    query.sql = "update TUsers set UsRole = 'user' where UsMail = (?)";
+                    query.values = [attr.usMail];
                     break;
                 case "lendings":
                     query.sql = "select * from TLendings order by LenStart desc;";
@@ -408,7 +406,7 @@ app.post("/admin/:action", (req, res) => {
     })
 })
 schedule.scheduleJob('0 0 * * *', () => { //runs every 24h at 0:0 // when is a lending expired? extra function!
-    db.query("", //TODO (Joscupe) select all lendings which have expired or which have no end date (would be nice if start date = 5 days in the past (if not additions are needed by (MrS-E)))
+    db.query("select LenStart", //TODO (Joscupe) select all lendings which have expired or which have no end date (would be nice if start date = 5 days in the past (if not additions are needed by (MrS-E)))
         (err, result) => {
             if (err) {
                 console.log("Schedule error: ", err);
