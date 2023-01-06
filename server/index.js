@@ -317,7 +317,7 @@ app.post("/admin/:action", (req, res) => {
                     query.values = [attr.usMail];
                     break;
                 case "lendings":
-                    query.sql = "select * from TLendings order by LenStart desc;";
+                    query.sql = "select LenId,UsMail, NFToken, NFName, NFInterpret, concat(date_format(LenStart, '%d.%m.%Y'),' ', time_format(LenStart, '%H:%i:%s')) as LenDateStart, concat(date_format(LenEnd, '%d.%m.%Y'),' ', time_format(LenEnd, '%H:%i:%s')) as LenDateEnd from TLendings natural join TNFTSongs order by LenStart desc;";
                     break;
                 case "remove_lend":
                     query.sql = "update TLendings set LenEnd = now() where LenId=(?);";
@@ -406,19 +406,23 @@ app.post("/admin/:action", (req, res) => {
     })
 })
 schedule.scheduleJob('0 0 * * *', () => { //runs every 24h at 0:0 // when is a lending expired? extra function!
-    db.query("select LenStart", //TODO (Joscupe) select all lendings which have expired or which have no end date (would be nice if start date = 5 days in the past (if not additions are needed by (MrS-E)))
+    db.query("select datediff(LenStart, now()) as days from TLendings",
         (err, result) => {
             if (err) {
                 console.log("Schedule error: ", err);
             } else {
                 result.forEach((d) => {
-                    db.query("", //TODO (Joscupe) update lending with end date -> if deletion additions are needed here by (MrS-E & Joscupe)
-                        [d.LenId],
-                        (err) => {
-                            if (err) {
-                                console.log("Schedule error: ", err);
-                            }
-                        });
+                    if(d.days > 30) {
+
+                        db.query("update TLendings set LenEnd = now()",
+                            [d.LenId],
+                            (err) => {
+                                console.log("removed");
+                                if (err) {
+                                    console.log("Schedule error: ", err);
+                                }
+                            });
+                    }
                 });
             }
         });
