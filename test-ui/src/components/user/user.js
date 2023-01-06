@@ -15,6 +15,7 @@ function User(props) {
     const pwd_new=useRef(null);
 
     const changeMail=()=>{
+        changeTrigger(false);
         axios.post(domain+"/update",{
             user: cookies.name,
             pwd_old: pwd_old.current.value,
@@ -29,6 +30,7 @@ function User(props) {
         })
     }
     const changePwd=()=>{
+        changeTrigger(false);
         axios.post(domain+"/update",{
             user: cookies.name,
             pwd_old: pwd_old.current.value,
@@ -39,11 +41,9 @@ function User(props) {
                 alert("Something happened that shouldn't happen, nothing was changed. Please check the entered password.")
             } else{
                 setCookie('pwd', pwd_new.current.value, { path: '/' });
-
             }
         })
     }
-
     const handleChangePasswd = () =>{
         changeTrigger(true);
         changeForm(
@@ -73,8 +73,7 @@ function User(props) {
             </div>
         );
     };
-
-    const  handleChangeMail = () => {
+    const handleChangeMail = () => {
         changeTrigger(true);
         changeForm(
             <div>
@@ -103,6 +102,14 @@ function User(props) {
                 </div>
             </div>
         );
+    }
+    const handleDeleteUser = () =>{
+        axios.post(props.domain+"/remove_user", {user: cookies.name, pwd: cookies.pwd}).then((res)=>{
+            setCookie('name', undefined, { path: '/' });
+            setCookie('pwd', undefined, { path: '/' });
+            alert(res.data);
+            window.location.reload();
+        })
     }
 
     if(data) {
@@ -134,6 +141,11 @@ function User(props) {
                 <div className="row">
                     <div className="col-3 mt-1">
                         <button className="btn btn-dark" onClick={handleChangeMail}>Change E-Mail</button>
+                    </div>
+                </div>
+                <div className="row">
+                    <div className="col-3 mt-1">
+                        <button className="btn btn-dark" onClick={handleDeleteUser}>Delete Account</button>
                     </div>
                 </div>
             </div>

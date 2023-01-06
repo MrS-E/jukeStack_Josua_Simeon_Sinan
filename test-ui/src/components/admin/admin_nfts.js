@@ -160,7 +160,6 @@ function AdminNfts(props) {
         changeTrigger(true);
     }
     const nftHandler = e => {
-        console.log(e.currentTarget.id)
         let nft = {};
         for (let d of nfts) {
             if (d.NFToken === e.currentTarget.id) {
