@@ -1,115 +1,214 @@
 import axios from "axios";
 import React, {useEffect, useRef, useState} from "react";
-import {BrowserRouter, Link, NavLink, Route, Routes} from 'react-router-dom';
+import {BrowserRouter, Link, Route, Routes} from "react-router-dom";
+import {Nav, Navbar, NavLink} from "react-bootstrap";
+import Main from "./components/main";
+import 'bootstrap/dist/css/bootstrap.min.css';
+import { useCookies } from 'react-cookie';
 
-function App() {
-    const user_ref = useRef();
-    const pwd_ref = useRef();
-    const sub_ref = useRef();
+function App() { //TESTED
+    const [cookies, setCookie] = useCookies(['user']);
+    const domain = "http://localhost:5000";
+    const user_ref = useRef(null);
+    const pwd_ref = useRef(null);
+    const sub_ref = useRef(null);
 
+    const [noRender, changeNoRender] = useState(false);
     const [user, changeUser] = useState("");
     const [passwd, changePasswd] = useState("");
-    const [login, changeLogin] = useState(false)
-
+    const [login, changeLogin] = useState(false);
     const [failed, changeFailed] = useState("");
+    const [admin, changeAdmin] = useState(false);
+
+    useEffect(()=>{
+        if(cookies.name && cookies.pwd){
+            changeNoRender(true);
+            changeUser(cookies.name);
+            changePasswd(cookies.pwd);
+        }
+    },[])
+
     useEffect(() => {
-        console.log(user, passwd)
-        axios.post("http://localhost:5000/login", {mail: user, password: passwd}).then(
-            (res) => {
-                console.log(res);
-                changeLogin(res.data.login);
-                sub_ref.current.removeAttribute("disabled")
-                if(!res.data.login){
-                    changeFailed("Wrong password or e-mail.")
-                }
-            }
-        )
-    }, [user, passwd])
+        if (noRender){
+            axios.post(domain + "/login", {mail: user, password: passwd}).then(
+                (res) => {
+                    changeLogin(res.data.login);
+                    changeAdmin(res.data.admin);
+                    if (!res.data.login) {
+                        if (res.data.message){
+                            changeFailed(res.data.message);
+                        }else{
+                            changeFailed("Wrong password or email.")
+                        }
+                        sub_ref.current.removeAttribute("disabled");
+                    }else{
+                        setCookie('name', user, { path: '/' });
+                        setCookie('pwd', passwd, { path: '/' });
+                    }
+                })
+                .catch();
+            changeNoRender(false);
+        }
+    }, [user, passwd, login])
 
     const handleClick = () => {
-        //console.log(user_ref)
         sub_ref.current.setAttribute("disabled", true)
         changeFailed("");
         changeUser(user_ref.current.value);
         changePasswd(pwd_ref.current.value);
+        changeNoRender(true)
     }
 
-    const mail_reg_ref = useRef();
-    const fname_reg_ref = useRef();
-    const lname_reg_ref = useRef();
-    const pwd_reg_ref = useRef();
-    const sub_reg_ref = useRef();
-    const [salu, setSalu] = useState("Sir")
+    const mail_reg_ref = useRef(null);
+    const fname_reg_ref = useRef(null);
+    const lname_reg_ref = useRef(null);
+    const pwd_reg_ref = useRef(null);
+    const sub_reg_ref = useRef(null);
+    const [salu, setSalu] = useState("Sir");
+    const [regFail, changeRegFail] = useState("")
 
     const onOptionChange = e => {
-        setSalu(e)
+        setSalu(e);
     }
-    const [regData, changerRegData] = useState({});
 
-    useEffect(() => {
-        console.log(regData)
-        if(regData.user) {
-            axios.post("http://localhost:5000/register", regData).then(
-                (res) => {
-                    console.log(res);
-                    if (!res.data.register) {
-                        changeFailed("Wrong password or e-mail.")
-                        sub_reg_ref.current.removeAttribute("disabled")
-                    }
-                }
-            )
-        }
-    }, [regData])
     const handleClick_register = () =>{
-        sub_reg_ref.current.setAttribute("disabled", true)
-        changerRegData({
+        changeRegFail("");
+        sub_reg_ref.current.setAttribute("disabled", true);
+        axios.post(domain+"/register", {
             mail: mail_reg_ref.current.value,
             salutation: salu,
             firstName: fname_reg_ref.current.value,
             lastName: lname_reg_ref.current.value,
             password: pwd_reg_ref.current.value
-        });
-        changeFailed("");
+        })
+            .then((res) => {
+                if (!res.data.register) {
+                    changeRegFail("Pls try again!");
+                    sub_reg_ref.current.removeAttribute("disabled");
+                }else{
+                   window.location.href=window.location.href.replace("register","");
+                }
+            })
+            .catch();
     }
 
-    if (!login) {
+    if (!login) { //TESTED
         return (
             <div>
                 <BrowserRouter>
                     <div>
-                        <NavLink as={Link} to="/">Login</NavLink>
-                        <NavLink as={Link} to="/register">Register</NavLink>
+                        <Navbar collapseOnSelect expand="sm" bg="dark" variant="dark">
+                            <Navbar.Toggle aria-controls="navbarScrools" data-bs-target="#navbarScroll" />
+                            <Navbar.Collapse id="navbarScroll">
+                                <Nav>
+                                    <NavLink eventKey={1} as={Link} to="/">Login</NavLink>
+                                    <NavLink eventKey={2} as={Link} to="/register">Register</NavLink>
+                                </Nav>
+                            </Navbar.Collapse>
+                        </Navbar>
                     </div>
                     <div className="container">
                         <Routes>
                             <Route path='/register' element={
-                                <div className="App">
-                                    <h1>register:</h1>
-                                    <p>salutation</p>
-                                    <input name={"sal"} type={"radio"} checked={salu === "Sir"} onChange={()=>onOptionChange("Sir")}/><span>Sir</span><br/>
-                                    <input name={"sal"} type={"radio"} checked={salu === "Madam"} onChange={()=>onOptionChange("Madam")}/><span>Madam</span><br/>
-                                    <p>first name</p>
-                                    <input ref={fname_reg_ref} type={"text"}/>
-                                    <p>last name</p>
-                                    <input ref={lname_reg_ref} type={"text"}/>
-                                    <p>mail</p>
-                                    <input ref={mail_reg_ref} type={"email"}/>
-                                    <p>password</p>
-                                    <input ref={pwd_reg_ref} type={"password"}/>
-                                    {failed}
-
-                                    <button ref={sub_reg_ref} onClick={handleClick_register}>Register</button>
+                                <div className="Auth-form-container container">
+                                    <div className="Auth-form-content">
+                                        <h3 className="Auth-form-title">Sign Up</h3>
+                                        <div className="form-group mt-3">
+                                            <label>Salutation</label><br/>
+                                            <input
+                                                name="sal"
+                                                type="radio"
+                                                className="form-check-input m-1"                                            checked={salu === "Sir"}
+                                                onChange={()=>onOptionChange("Sir")}/>
+                                            <span>Sir</span><br/>
+                                            <input
+                                                name="sal"
+                                                type="radio"
+                                                className="form-check-input m-1"                                            checked={salu === "Madam"}
+                                                onChange={()=>onOptionChange("Madam")}/>
+                                            <span>Madam</span><br/>
+                                        </div>
+                                        <div className="form-group mt-3">
+                                            <label>First name</label>
+                                            <input
+                                                type="text"
+                                                className="form-control mt-1"
+                                                placeholder="John"
+                                                ref={fname_reg_ref}
+                                            />
+                                        </div>
+                                        <div className="form-group mt-3">
+                                            <label>Surname</label>
+                                            <input
+                                                type="text"
+                                                className="form-control mt-1"
+                                                placeholder="Doe"
+                                                ref={lname_reg_ref}
+                                            />
+                                        </div>
+                                        <div className="form-group mt-3">
+                                            <label>Email address</label>
+                                            <input
+                                                type="email"
+                                                className="form-control mt-1"
+                                                placeholder="Enter email"
+                                                ref={mail_reg_ref}
+                                            />
+                                        </div>
+                                        <div className="form-group mt-3">
+                                            <label>Password</label>
+                                            <input
+                                                type="password"
+                                                ref={pwd_reg_ref}
+                                                className="form-control mt-1"
+                                                placeholder="Enter password"
+                                            />
+                                        </div>
+                                        <div className="d-grid gap-2 mt-3">
+                                            <button
+                                                type="submit"
+                                                ref={sub_reg_ref}
+                                                className="btn btn-primary"
+                                                onClick={handleClick_register}>
+                                                Submit
+                                            </button>
+                                        </div>
+                                        <span className="text-right text-danger mt-2">{regFail}</span>
+                                    </div>
                                 </div>
                             }/>
-                            <Route path='/' element={
-                                <div className="App">
-                                    <h1>login:</h1>
-                                    <p>mail:</p>
-                                    <input ref={user_ref} type={"text"}/>
-                                    <p>password:</p>
-                                    <input ref={pwd_ref} type={"password"}/>
-                                    {failed}
-                                    <button onClick={handleClick} ref={sub_ref}>login</button>
+                            <Route path='*' element={
+                                <div className="Auth-form-container container">
+                                    <div className="Auth-form-content">
+                                        <h3 className="Auth-form-title">Sign In</h3>
+                                        <div className="form-group mt-3">
+                                            <label>Email address</label>
+                                            <input
+                                                type="email"
+                                                className="form-control mt-1"
+                                                placeholder="Enter email"
+                                                ref={user_ref}
+                                            />
+                                        </div>
+                                        <div className="form-group mt-3">
+                                            <label>Password</label>
+                                            <input
+                                                type="password"
+                                                ref={pwd_ref}
+                                                className="form-control mt-1"
+                                                placeholder="Enter password"
+                                            />
+                                        </div>
+                                        <div className="d-grid gap-2 mt-3">
+                                            <button type="submit" ref={sub_ref} className="btn btn-primary" onClick={handleClick}>
+                                                Submit
+                                            </button>
+                                        </div>
+                                        <span className="text-right text-danger mt-2">{failed}</span>
+                                        <p className="forgot-password text-right mt-2">
+                                            {/*Forgot <a href="#">password?</a> {/*TODO forgotten password*/}
+                                        </p>
+                                    </div>
                                 </div>
                             }/>
                         </Routes>
@@ -117,9 +216,10 @@ function App() {
                 </BrowserRouter>
             </div>
         );
-    }else{
+    }
+    else{
         return (
-            <h1>Login successful</h1>
+            <Main user={user} domain={domain} admin={admin}/>
         );
     }
 }
