@@ -48,7 +48,6 @@ function AdminNfts(props) {
         }
     }
     const new_nft = () => {
-        sub.current.setAttribute("disabled", true)
         changeTrigger(false);
         axios.post(props.domain + "/admin/add_nft", {
             user: cookies.name,
@@ -61,9 +60,9 @@ function AdminNfts(props) {
             }
         }).then((res) => {
                 //alert("NFT was added...")
-                sub.current.removeAttribute("disabled")
                 update_values("normal")
         })
+        setTimeout(update_values, 10, "normal") //Workaround add_nft doesn't send response...
     }
     const delete_nft = token => {
         changeTrigger(false);
