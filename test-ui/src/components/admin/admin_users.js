@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import axios from "axios";
 import {useCookies} from "react-cookie";
 import Popup from "../popup";
@@ -10,6 +10,7 @@ function AdminUsers(props) {
     const [users, changeUsers] = useState([]);
     const [loading, changeLoading] = useState(true);
     const [trigger, changeTrigger] = useState(false)
+    const search = useRef(null);
 
     useEffect(() => {
         axios.post(props.domain + "/admin/check", {user: cookies.name, pwd: cookies.pwd, attributes: {}})
@@ -28,30 +29,43 @@ function AdminUsers(props) {
                 }
             })
     }, [])
-    //TODO add, delete, make admin, remove rent,
 
     const update_data = (typ, value) =>{
         switch (typ){
             case "search":
-                axios.post(props.domain+"/nft_search", {search: value}).then((res)=>{
-                    changeNFTs(res.data);
+                axios.post(props.domain+"/admin/user_search", {user: cookies.name, pwd: cookies.pwd, attributes: {search: value}}).then((res)=>{
+                    changeUsers(res.data);
                 })
                 break;
             case "normal":
-                axios.post(props.domain + "/admin/", {user: cookies.name, pwd: cookies.pwd}).then((res) => {
-                    changeNFTs(res.data);
+                axios.post(props.domain + "/admin/all_users", {user: cookies.name, pwd: cookies.pwd}).then((res) => {
+                    changeUsers(res.data);
                 })
                 break;
         }
     }
     const deleteUser = mail =>{
         changeTrigger(false)
-        axios.post(props.domain+"/admin/remove_user", {user: cookies.name, pwd: cookies.pwd, attributes: {UsMail: mail}}).then((res)=>{
+        axios.post(props.domain+"/admin/remove_user", {user: cookies.name, pwd: cookies.pwd, attributes: {usMail: mail}}).then((res)=>{
+            update_data("normal");
             alert("user " + mail + " deleted");
         })
     }
+    const editAdminStatus = (role, mail) => {
+        changeTrigger(false)
+        if(role==="admin"){
+            axios.post(props.domain+"/admin/remove_admin", {user: cookies.name, pwd: cookies.pwd, attributes: {usMail: mail}}).then(()=>{
+                alert("User status of user "+mail+" updates to role")
+                update_data("normal")
+            })
+        }else{
+            axios.post(props.domain+"/admin/appoint_admin", {user: cookies.name, pwd: cookies.pwd, attributes: {usMail: mail}}).then(()=>{
+                alert("User status of user "+mail+" updates to admin")
+                update_data("normal")
+            })
+        }
+    }
     const userHandler = e =>{
-        console.log(e.currentTarget.id)
         let user = {};
         for (let d of users) {
             if (d.UsMail === e.currentTarget.id) {
@@ -83,8 +97,8 @@ function AdminUsers(props) {
                     <div className="col-9">{user.UsRole}</div>
                 </div>
                 <div className="row">
-                    <button className="btn btn-primary m-1">Delete</button>
-                    <button className="btn btn-primary m-1">Edit admin status</button>
+                    <button className="btn btn-primary m-1" onClick={()=>deleteUser(user.UsMail)}>Delete</button>
+                    <button className="btn btn-primary m-1" onClick={()=>editAdminStatus(user.UsRole, user.UsMail)}>Edit admin status</button>
                 </div>
             </div>
         )
@@ -97,15 +111,12 @@ function AdminUsers(props) {
                 <div className="mt-4">
                     <h3>Admin user panel</h3>
                     <div className="row">
-                        <div className="col-2">
-                            {/*<button className="btn btn-outline-info" onClick={}>Add </button>*/}
+                        {/*<div className="col-2">
+                            <button className="btn btn-outline-info" onClick={}>Add Users</button>
                         </div>
-                        <div className="col-2"></div>
-                        <div className="col-6">
-                            <input type="text" className="form-control" placeholder="Search"/>
-                        </div>
-                        <div className="col-2 float-end">
-                            <button className="btn btn-outline-info" >Search</button>
+                        <div className="col-2"></div>*/}
+                        <div className="col-12">
+                            <input type="text" className="form-control" ref={search} placeholder="Search" onChange={()=>update_data("search", search.current.value)}/>
                         </div>
                     </div>
                     <div className="row">
@@ -139,18 +150,20 @@ function AdminUsers(props) {
                         </div>
                     </div>
                 </div>
-                <Popup>
+                <Popup trigger={trigger} changeTrigger={changeTrigger}>
                     {value}
                 </Popup>
             </>
         );
-    } else if (loading) {
+    }
+    else if (loading) {
         return (
             <div className="mt-4">
                 <h3>Loading</h3>
             </div>
         )
-    } else {
+    }
+    else {
         return (
             <div className="mt-4">
                 <h3>You are a bit misguided, please go back to the normal sites.</h3>
