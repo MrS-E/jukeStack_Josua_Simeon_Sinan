@@ -1,3 +1,34 @@
+/*
+This Script manage all server-based actions.
+It contains:
+1. Default message (/)
+2. Login (/login)
+3. Register (/register)
+4. Lends traffic (/history)
+5. NFTSongs List (/list)
+6. lend a NFTSong (/lend)
+7. current lendings (/lendings)
+8. return NFTSong (/return)
+9. User information (/user)
+10. Update user information
+11. Search NFTSong (/nft_search)
+12. User can delete his account (/remove_user)
+13. Admin tools (/admin/:action)
+    13.1 check if user is admin (/check)
+    13.2 all user information (/all_users)
+    13.3 search a user (/user_search)
+    13.4 search lendings (/lendings_search)
+    13.5 remove a user (/remove_user)
+    13.6 make user an admin (/appoint_admin)
+    13.7 make admin an user (/remove_user)
+    13.8 show all lendings (/lendings)
+    13.9 return a lending (/return_lending)
+    13.10 show all songs (/nfts)
+    13.11 delete a song  (/delete_nft)
+    13.12 add a song (/add_nft)
+    13.13 edit song information (/edit_nft)
+
+ */
 const sha256 = require("crypto-js/sha256");
 const express = require("express");
 const mysql = require("mysql2"); //mysql2 because with mysql I have the error: 'ER_NOT_SUPPORTED_AUTH_MODE'
@@ -23,9 +54,11 @@ db.connect((err) => {
     }
 });
 
+// 1. Default message (/)
 app.get("/", (req, res) => {
     res.send("Server is running")
 }) //TESTED
+// 2. Login (/login)
 app.post("/login", (req, res) => {
     const mail = req.body.mail;
     const password = sha256(req.body.password).toString();
@@ -52,6 +85,7 @@ app.post("/login", (req, res) => {
             }
         });
 }); //TESTED
+// 3. Register (/register)
 app.post("/register", (req, res) => { //TESTED
     const mail = req.body.mail;
     const salutation = req.body.salutation;
@@ -70,6 +104,7 @@ app.post("/register", (req, res) => { //TESTED
         }
     );
 }); //TESTED
+// 4. Lends traffic (/history)
 app.post("/history", (req, res) => { //TESTED
     const mail = req.body.mail;
     const pwd = req.body.pwd;
@@ -94,6 +129,7 @@ app.post("/history", (req, res) => { //TESTED
         }
     })
 }) //TESTED
+// 5. NFTSongs List (/list)
 app.get("/list", (req, res) => { //TESTED
     db.query("select * from TNFTSongs",
         (err, result) => {
@@ -105,6 +141,7 @@ app.get("/list", (req, res) => { //TESTED
             }
         });
 }); //TESTED
+// 6. lend a NFTSong (/lend)
 app.post("/lend", (req, res) => { //TESTED
     const token = req.body.NFToken;
     const userMail = req.body.mail;
@@ -147,6 +184,7 @@ app.post("/lend", (req, res) => { //TESTED
         }
     })
 }); //TESTED
+// 7. current lendings (/lendings)
 app.post("/lendings", (req, res) => { //TESTED
     const userMail = req.body.user;
     const userPwd = req.body.pwd;
@@ -170,6 +208,7 @@ app.post("/lendings", (req, res) => { //TESTED
         }
     })
 }); //TESTED
+// 8. return NFTSong (/return)
 app.post("/return", (req, res) => { //TESTED
     const LenID = req.body.id;
     const mail = req.body.mail;
@@ -192,6 +231,7 @@ app.post("/return", (req, res) => { //TESTED
         }
     });
 }); //TESTED
+// 9. User information (/user)
 app.post("/user", (req, res) => { //TESTED
     const mail = req.body.user;
     const pwd = req.body.pwd
@@ -218,6 +258,7 @@ app.post("/user", (req, res) => { //TESTED
         }
     })
 }) //TESTED
+// 10. Update user information
 app.post("/update", (req, res) => { //TESTED
     const user = req.body.user;
     const pwd_old = sha256(req.body.pwd_old).toString();
@@ -235,7 +276,8 @@ app.post("/update", (req, res) => { //TESTED
             }
         }
     );
-}) //
+}) //TESTED
+//11. Search NFTSong (/nft_search)
 app.post("/nft_search", (req, res) => {
     const search = req.body.search;
     db.query("select * from TNFTSongs where locate ((?), NFToken) or locate ((?), NFInterpret) or locate ((?), NFName) or locate ((?), NFYear);", [search, search, search, search], (err, response) => {
@@ -245,7 +287,8 @@ app.post("/nft_search", (req, res) => {
             res.send(response);
         }
     })
-});
+}); //TESTED
+// 12. User can delete his account (/remove_user)
 function deleteUser(mail) {
     // return all active lendings
     db.query("select NFToken from TLendings where UsMail = (?)", [mail], (err, res) => {
@@ -267,7 +310,6 @@ function deleteUser(mail) {
         }
     })
 }
-
 app.post("/remove_user", (req,res) => { //remove user tool for the user
     const user = req.body.user;
     const pwd = req.body.pwd;
@@ -276,6 +318,7 @@ app.post("/remove_user", (req,res) => { //remove user tool for the user
     })
     res.send("YOU ARE DELETED, NEVER COME BACK!");
 });
+// 13. Admin tools (/admin/:action)
 app.post("/admin/:action", (req, res) => {
     const user = req.body.user;
     const pwd = req.body.pwd;
@@ -288,46 +331,53 @@ app.post("/admin/:action", (req, res) => {
                 values: []
             }
             switch (action) {
+                // 13.1 check if user is admin (/check)
                 case "check":
                     query.sql = "select 'true' as admin;"
                     break;
+                // 13.2 all user information (/all_users)
                 case "all_users":
                     query.sql = "select * from TUsers;";
                     break;
+                // 13.3 search a user (/user_search)
                 case "user_search":
                     query.sql = "select * from TUsers where locate ((?), UsMail) or locate ((?), UsFName) or locate ((?), UsSName) or locate ((?), UsSalutation) or locate ((?), UsMail);";
                     query.values = [attr.search,attr.search,attr.search,attr.search,attr.search];
                     break;
-                case "admin":
-                    query.sql = "update TUsers set UsRole='admin' where UsMail=(?);";
-                    query.values = [attr.mail]
-                    break;
+                // 13.4 search lendings (/lendings_search)
                 case "lendings_search":
                     query.sql = "select LenId,UsMail, NFToken, NFName, NFInterpret, concat(date_format(LenStart, '%d.%m.%Y'),' ', time_format(LenStart, '%H:%i:%s')) as LenDateStart, concat(date_format(LenEnd, '%d.%m.%Y'),' ', time_format(LenEnd, '%H:%i:%s')) as LenDateEnd from TLendings natural join TNFTSongs where locate ((?), LenId) or locate ((?), UsMail) or locate ((?), NFToken) or locate ((?), LenStart) or locate ((?), LenEnd) order by LenStart desc;";
                     query.values = [attr.search,attr.search,attr.search,attr.search,attr.search];
                     break;
+                // 13.5 remove a user (/remove_user)
                 case "remove_user": // remove user admin tool
                     deleteUser(attr.usMail);
                     res.send("User deleted");
                     break;
+                // 13.6 make user an admin (/appoint_admin)
                 case "appoint_admin":
                     query.sql = "update TUsers set UsRole = 'admin' where UsMail = (?)";
                     query.values = [attr.usMail];
                     break;
+                // 13.7 make admin an user (/remove_user)
                 case "remove_admin":
                     query.sql = "update TUsers set UsRole = 'user' where UsMail = (?)";
                     query.values = [attr.usMail];
                     break;
+                // 13.8 show all lendings (/lendings)
                 case "lendings":
                     query.sql = "select LenId,UsMail, NFToken, NFName, NFInterpret, concat(date_format(LenStart, '%d.%m.%Y'),' ', time_format(LenStart, '%H:%i:%s')) as LenDateStart, concat(date_format(LenEnd, '%d.%m.%Y'),' ', time_format(LenEnd, '%H:%i:%s')) as LenDateEnd from TLendings natural join TNFTSongs order by LenStart desc;";
                     break;
-                case "remove_lend":
+                // 13.9 return a lending (/return_lending)
+                case "retrun_lending":
                     query.sql = "update TLendings set LenEnd = now() where LenId=(?);";
                     query.values = [attr.lenId];
                     break;
+                // 13.10 show all songs (/nfts)
                 case "nfts":
                     query.sql = "select * from TNFTSongs;";
                     break;
+                // 13.11 delete a song  (/delete_nft)
                 case "delete_nft":
                     db.query("select LenID from TLendings where NFToken = (?)", [attr.token], (err, res) => {
                         if(err) {
@@ -344,6 +394,7 @@ app.post("/admin/:action", (req, res) => {
                     query.sql = "delete from TNFTSongs where NFToken=(?);";
                     query.values = [attr.token]
                     break;
+                // 13.12 add a song (/add_nft)
                 case "add_nft":
                     let tokenName = "NFT";
                     if (attr.interpret !== null) { // First 3 Letters of the token are the first 3 Letters of to interpret
@@ -399,6 +450,7 @@ app.post("/admin/:action", (req, res) => {
                     tok(tokenName);
                     res.send("user added");
                     break;
+                // 13.13 edit song information (/edit_nft)
                 case "edit_nft":
                     query.sql = "update TNFTSongs set NFInterpret=(?), NFName=(?), NFLength=(?), NFYear=(?) where NFToken=(?);";
                     query.values = [attr.interpret, attr.name, attr.lenght, attr.year, attr.token];

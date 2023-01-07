@@ -97,7 +97,7 @@ function AdminNfts(props) {
                 token: nft.NFToken,
                 name: name.current.value!=="" ? name.current.value : nft.NFName,
                 interpret: interpret.current.value!=="" ? interpret.current.value : nft.NFInterpret,
-                lenght: lenght.current.value!=="" ? lenght.current.value : nft.NFLength,
+                lenght: lenght.current.value!=="" ? "00:"+lenght.current.value : nft.NFLength,
                 year: year.current.value.toString().length===4?year.current.value:year.current.value===3?"0"+year.current.value.toString():year.current.value===2?"00"+year.current.value.toString():year.current.value===1?"000"+year.current.value.toString():nft.NFYear
             }
         })
