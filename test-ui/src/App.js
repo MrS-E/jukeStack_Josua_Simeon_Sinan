@@ -8,7 +8,7 @@ import { useCookies } from 'react-cookie';
 
 function App() { //TESTED
     const [cookies, setCookie] = useCookies(['user']);
-    const domain = "http://192.168.1.107:5000";
+    const domain = "http://localhost:5000";
     const user_ref = useRef(null);
     const pwd_ref = useRef(null);
     const sub_ref = useRef(null);
@@ -111,7 +111,7 @@ function App() { //TESTED
                     <div className="container">
                         <Routes>
                             <Route path='/register' element={
-                                <div className="Auth-form-container container">
+                                <div className="Auth-form-container container mt-4">
                                     <div className="Auth-form-content">
                                         <h3 className="Auth-form-title">Sign Up</h3>
                                         <div className="form-group mt-3">
@@ -179,7 +179,7 @@ function App() { //TESTED
                                 </div>
                             }/>
                             <Route path='*' element={
-                                <div className="Auth-form-container container">
+                                <div className="Auth-form-container container mt-4">
                                     <div className="Auth-form-content">
                                         <h3 className="Auth-form-title">Sign In</h3>
                                         <div className="form-group mt-3">

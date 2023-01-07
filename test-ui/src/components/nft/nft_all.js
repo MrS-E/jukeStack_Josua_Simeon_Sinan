@@ -26,7 +26,7 @@ function NFTAll(props) {
                 }else if(response.data.error){
                     alert("Something went wrong. Please try again.")
                 }else{
-                    alert("The NFT song "+id+" is successfully rented.")
+                    alert("The NFT song is successfully rented.")
                 }
             }
         )
