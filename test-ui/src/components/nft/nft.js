@@ -4,6 +4,7 @@ import {useCookies} from "react-cookie";
 import Popup from "../popup";
 import axios from "axios";
 
+/*CODE NOT IN ACTIVE USE, COMBINES THE FUNCTIONALITY OF ALL 3 NFT FRONTEND FILES*/
 
 function Nft(props) {
     const [cookies, setCookie] = useCookies(['user']);
@@ -14,7 +15,7 @@ function Nft(props) {
     const [d_history, changeHistory] = useState(undefined);
     const [reload, changeReload] = useState(true)
 
-    useEffect(()=> {
+    useEffect(()=> { //get all 3 data arrays from server
         axios.get(props.domain + "/list").then((res)=>{
             changeList(res.data);
         })
@@ -26,6 +27,7 @@ function Nft(props) {
         })
     },[reload])
 
+    /*more or less the same function as in the outher 3 nft files*/
     const lend = id =>{
         axios.post(props.domain+"/lend",{NFToken:id, mail:cookies.name, pwd:cookies.pwd}).then(
             (response)=>{
@@ -135,6 +137,7 @@ function Nft(props) {
         changeTrigger(true);
     }
 
+    /*HTML OUTPUT*/
     return (
         <>
             <div className="container mt-4">

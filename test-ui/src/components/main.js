@@ -17,9 +17,9 @@ function Main(props) {
     const [cookies, setCookie] = useCookies(['user']);
     return (
         <div>
-            <BrowserRouter>
+            <BrowserRouter> {/*used to switch between sites*/}
                 <div>
-                    <Navbar collapseOnSelect expand="sm" bg="dark" variant="dark">
+                    <Navbar collapseOnSelect expand="sm" bg="dark" variant="dark"> {/*Navbar*/}
                         <Container fluid>
                             <Navbar.Brand>SiSiJo</Navbar.Brand>
                             <Navbar.Toggle aria-controls="navbarScrools" data-bs-target="#navbarScroll" />
@@ -38,7 +38,7 @@ function Main(props) {
                                 </Nav>
                                 <Navbar.Text>
                                     Signed in as {props.user}
-                                    <Button variant="outline-success" style={{marginLeft:"2vw"}} onClick={()=>{
+                                    <Button variant="outline-success" style={{marginLeft:"2vw"}} onClick={()=>{ //onclick event to set cookies to undefined and reload page
                                         setCookie('name', undefined, { path: '/' });
                                         setCookie('pwd', undefined, { path: '/' });
                                         window.location.reload();
@@ -50,7 +50,7 @@ function Main(props) {
                     </Navbar>
                 </div>
                 <div className="container">
-                    <Routes>
+                    <Routes> {/*All subpages are listed here, also a default 404 page*/}
                         <Route path='/user' element={<User domain={props.domain}/>}/>
                         <Route path='/nft/all' element={<NFTAll domain={props.domain}/>}/>
                         <Route path='/nft/history' element={<NFTHistory domain={props.domain}/>}/>

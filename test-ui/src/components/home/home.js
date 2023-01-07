@@ -6,8 +6,10 @@ import useGet from "../../hook/useGet";
 function Home(props) {
     const [cookies, setCookie] = useCookies(['user']);
     const domain = props.domain;
-    const {data, loading} = usePost(domain+"/lendings", {user: cookies.name, pwd:cookies.pwd})
-    const d = useGet(props.domain + "/list").data
+    const {data, loading} = usePost(domain+"/lendings", {user: cookies.name, pwd:cookies.pwd}) //get data from rented stuff
+    const d = useGet(props.domain + "/list").data //get data from the nft table in db over server
+
+    /*HTML OUTPUT*/
     if(data && d){
         return (
             <div className="mt-4">
@@ -25,7 +27,7 @@ function Home(props) {
                            </tr>
                         </thead>
                         <tbody>
-                            {data.lending.length>0?data.lending.map((d,i)=>{
+                            {data.lending.length>0?data.lending.map((d,i)=>{ //displays the rented nfts (max. 5)
                                 return(
                                 <tr key={i}>
                                     <td>{d.NFName}</td>
@@ -51,7 +53,7 @@ function Home(props) {
                         </tr>
                         </thead>
                         <tbody>
-                        {d.result.length>0?d.result.map((d,i)=>{
+                        {d.result.length>0?d.result.map((d,i)=>{ //displays the last 5 added nfts
                             if(i<5) {
                                 return (
                                     <tr key={i + d.NFToken + "all"} id={d.NFToken}>

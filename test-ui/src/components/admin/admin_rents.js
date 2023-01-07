@@ -12,7 +12,7 @@ function AdminRents(props) {
     const [value, changeValue] = useState()
     const search = useRef(null);
 
-    useEffect(()=>{
+    useEffect(()=>{ //check if user is admin + first fetch
         axios.post(props.domain + "/admin/check", {user: cookies.name, pwd: cookies.pwd, attributes: {}})
             .then((res_check)=>{
                 changeCheck(res_check.data[0].admin === "true");
@@ -28,7 +28,7 @@ function AdminRents(props) {
             })
     }, [])
 
-    const update_data = (typ, value) => {
+    const update_data = (typ, value) => { //same stuff as everywhere (everything with a searchbar)
         switch (typ){
             case "search":
                 axios.post(props.domain+"/admin/lendings_search", {user: cookies.name, pwd: cookies.pwd, attributes: {search: value}}).then((res)=>{
@@ -42,14 +42,14 @@ function AdminRents(props) {
                 break;
         }
     }
-    const deleteLend = (LenID) =>{
+    const deleteLend = (LenID) =>{ //to return a lending via server (backend)
         changeTrigger(false);
-        axios.post(props.domain+"/admin/remove_lend", {user: cookies.name, pwd: cookies.pwd, attributes: {lenId: LenID}}).then(()=>{
+        axios.post(props.domain+"/admin/return_lending", {user: cookies.name, pwd: cookies.pwd, attributes: {lenId: LenID}}).then(()=>{
             update_data("normal");
             alert("End of rent set");
         })
     }
-    const lendHandler = e =>{
+    const lendHandler = e =>{ //handle click in table and display popup
         console.log(e.currentTarget.id);
         let lend = {};
         for (let d of lendings) {
@@ -97,6 +97,7 @@ function AdminRents(props) {
         changeTrigger(true);
     }
 
+    /*HTML OUTPUT*/
     if (checked && !loading) {
     return (
         <>

@@ -11,14 +11,14 @@ function NFTAll(props) {
     const [value, changeValue] = useState("");
     const search = useRef(null);
 
-    useEffect(() => {
+    useEffect(() => { //first fetch to get all data
         axios.get(props.domain + "/list").then((res) => {
             changeNFTs(res.data.result);
             changeLoading(false);
         })
     }, [])
 
-    const lend = id =>{
+    const lend = id =>{ //function to send server request to rent something nd return ui to user if finished
         axios.post(props.domain+"/lend",{NFToken:id, mail:cookies.name, pwd:cookies.pwd}).then(
             (response)=>{
                 if(response.data.message){
@@ -31,14 +31,15 @@ function NFTAll(props) {
             }
         )
     }
-    const lendHandler = e => {
+    const lendHandler = e => { //handles click on tr in table in html code to open popup search value out of array and openpopup
         let nft={};
-        for(let d of nfts){
+        for(let d of nfts){ //search for data in array
             if(d.NFToken === e.currentTarget.id){
                 nft=d;
                 break;
             }
         }
+        /*POPUP HTML*/
         changeValue(
             <div>
                 <h3>Lending</h3>
@@ -66,7 +67,7 @@ function NFTAll(props) {
         );
         changeTrigger(true);
     }
-    const update_values = (typ, value) =>{
+    const update_values = (typ, value) =>{ //function to updata and search (search and update are more or less the same for frontend, just two different searcher fetches)
         switch (typ){
             case "search":
                 axios.post(props.domain+"/nft_search", {search: value}).then((res)=>{
@@ -82,6 +83,7 @@ function NFTAll(props) {
         }
     }
 
+    /*HTML OUTPUT*/
     if(!loading){
         return (
             <>

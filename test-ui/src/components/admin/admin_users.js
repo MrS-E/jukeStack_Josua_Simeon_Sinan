@@ -12,12 +12,12 @@ function AdminUsers(props) {
     const [trigger, changeTrigger] = useState(false)
     const search = useRef(null);
 
-    useEffect(() => {
-        axios.post(props.domain + "/admin/check", {user: cookies.name, pwd: cookies.pwd, attributes: {}})
+    useEffect(() => { //fetch to check if user is really an admin and to get array with all the users
+        axios.post(props.domain + "/admin/check", {user: cookies.name, pwd: cookies.pwd, attributes: {}}) //server request to check if user is admin
             .then((res_check) => {
                 changeCheck(res_check.data[0].admin === "true");
                 if (res_check.data[0].admin === "true") {
-                    axios.post(props.domain + "/admin/all_users", {
+                    axios.post(props.domain + "/admin/all_users", { //server request to get all the data
                         user: cookies.name,
                         pwd: cookies.pwd
                     }).then((res) => {
@@ -30,7 +30,7 @@ function AdminUsers(props) {
             })
     }, [])
 
-    const update_data = (typ, value) =>{
+    const update_data = (typ, value) =>{//function to update data (search is done in the backend)
         switch (typ){
             case "search":
                 axios.post(props.domain+"/admin/user_search", {user: cookies.name, pwd: cookies.pwd, attributes: {search: value}}).then((res)=>{
@@ -44,10 +44,10 @@ function AdminUsers(props) {
                 break;
         }
     }
-    const deleteUser = mail =>{
-        if (window.confirm("Do you really want to delete this user. He can't visit the site again... ヽ༼ ಠ益ಠ ༽ﾉ") === true) {
-            changeTrigger(false)
-            axios.post(props.domain + "/admin/remove_user", {
+    const deleteUser = mail =>{ //function to delete user
+        if (window.confirm("Do you really want to delete this user. He can't visit the site again... ヽ༼ ಠ益ಠ ༽ﾉ") === true) { //check for confirmation to prevent misclickes
+            changeTrigger(false) //to close popup
+            axios.post(props.domain + "/admin/remove_user", { //server request
                 user: cookies.name,
                 pwd: cookies.pwd,
                 attributes: {usMail: mail}
@@ -56,11 +56,11 @@ function AdminUsers(props) {
                 alert("user " + mail + " deleted");
             })
         }else{
-            alert("Deletion was stopped ☜(⌒▽⌒)☞")
+            alert("Deletion was stopped ☜(⌒▽⌒)☞") //if confirmation was false
         }
     }
-    const editAdminStatus = (role, mail) => {
-        changeTrigger(false)
+    const editAdminStatus = (role, mail) => { //function to edit admin status
+        changeTrigger(false) //to close popup
         if(role==="admin"){
             axios.post(props.domain+"/admin/remove_admin", {user: cookies.name, pwd: cookies.pwd, attributes: {usMail: mail}}).then(()=>{
                 alert("User status of user "+mail+" updates to role")
@@ -73,7 +73,7 @@ function AdminUsers(props) {
             })
         }
     }
-    const userHandler = e =>{
+    const userHandler = e =>{ //handle click in table on user (similar to all the other handlers)
         let user = {};
         for (let d of users) {
             if (d.UsMail === e.currentTarget.id) {
@@ -113,6 +113,7 @@ function AdminUsers(props) {
         changeTrigger(true);
     }
 
+    /*HTML OUTPUT*/
     if (checked && !loading) {
         return (
             <>
