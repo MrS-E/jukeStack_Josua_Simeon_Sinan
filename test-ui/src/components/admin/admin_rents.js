@@ -90,7 +90,7 @@ function AdminRents(props) {
                     <div className="col-9">{lend.LenDateEnd}</div>
                 </div>
                 <div className="row">
-                    <button className="btn btn-primary m-1" onClick={()=>deleteLend(lend.LenId)}>Delete</button>
+                    <button className="btn btn-primary m-1" onClick={()=>deleteLend(lend.LenId)}>Return lending</button>
                 </div>
             </div>
         )

@@ -16,31 +16,35 @@ function User(props) {
 
     const changeMail=()=>{
         changeTrigger(false);
+        const mail = mail_new.current.value
         axios.post(domain+"/update",{
             user: cookies.name,
             pwd_old: pwd_old.current.value,
             pwd_new: pwd_old.current.value,
-            mail_new: mail_new.current.value
+            mail_new: mail
         }).then((res)=>{
             if(res.data.result.affectedRows<1){
                 alert("Something happened that shouldn't happen, nothing was changed. Please check the entered password.")
             }else{
-                setCookie('name', mail_new.current.value, { path: '/' });
+                alert("Mail changed")
+                setCookie('name', mail, { path: '/' });
             }
         })
     }
     const changePwd=()=>{
         changeTrigger(false);
+        const pwd = pwd_new.current.value
         axios.post(domain+"/update",{
             user: cookies.name,
             pwd_old: pwd_old.current.value,
-            pwd_new: pwd_new.current.value,
+            pwd_new: pwd,
             mail_new: cookies.name
         }).then((res)=>{
             if(res.data.result.affectedRows<1){
                 alert("Something happened that shouldn't happen, nothing was changed. Please check the entered password.")
-            } else{
-                setCookie('pwd', pwd_new.current.value, { path: '/' });
+            }else{
+                alert("Password changes")
+                setCookie('pwd', pwd, { path: '/' })
             }
         })
     }
@@ -104,12 +108,16 @@ function User(props) {
         );
     }
     const handleDeleteUser = () =>{
-        axios.post(props.domain+"/remove_user", {user: cookies.name, pwd: cookies.pwd}).then((res)=>{
-            setCookie('name', undefined, { path: '/' });
-            setCookie('pwd', undefined, { path: '/' });
-            alert(res.data);
-            window.location.reload();
-        })
+        if (window.confirm("Are you sure you want to leave us, you CAN'T come back") === true) {
+            axios.post(props.domain + "/remove_user", {user: cookies.name, pwd: cookies.pwd}).then((res) => {
+                setCookie('name', undefined, {path: '/'});
+                setCookie('pwd', undefined, {path: '/'});
+                alert(res.data);
+                window.location.reload();
+            })
+        }else{
+            alert("Yeah ヽ(´▽`)/")
+        }
     }
 
     if(data) {
