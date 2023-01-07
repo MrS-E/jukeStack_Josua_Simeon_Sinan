@@ -10,27 +10,27 @@ function NFTRent(props) {
     const [trigger, changeTrigger] = useState(false)
     const [value, changeValue] = useState("");
 
-    useEffect(() => {
+    useEffect(() => { //fist load of all lendings of user (on load of page)
         axios.post(props.domain + "/lendings", {user: cookies.name, pwd: cookies.pwd}).then((res)=>{
             changeNFTs(res.data.lending);
             changeLoading(false);
         })
     }, [])
 
-    const returner = id => {
+    const returner = id => { //simple server request to return nft
         axios.post(props.domain+"/return", {id:id, mail: cookies.name, pwd: cookies.pwd}).then((response)=>{
-            update_values()
+            update_values() //to update data for display
             alert(response.data.message);
         })
     }
-    const update_values = () =>{
+    const update_values = () =>{ //updates data for display
         axios.post(props.domain + "/lendings", {user: cookies.name, pwd: cookies.pwd}).then((res)=>{
             changeNFTs(res.data.lending);
         })
     }
-    const returnHandler = e =>{
+    const returnHandler = e =>{ //handles click on nft + popup and parse data to server over 'returner'
         let nft={};
-        for(let d of nfts){
+        for(let d of nfts){ //search of data out of array
             if(d.LenId.toString() === e.currentTarget.id.toString()){
                 nft=d;
                 break;
@@ -76,6 +76,7 @@ function NFTRent(props) {
         changeTrigger(true);
     }
 
+    /*HTMl RETURN (VISIBLE CONTENT)*/
     if(!loading){
         return (
             <>
@@ -94,7 +95,7 @@ function NFTRent(props) {
                                 </tr>
                                 </thead>
                                 <tbody>
-                                {nfts?nfts.map((d,i)=>{
+                                {nfts?nfts.map((d,i)=>{ //maps the returned array
                                     return(
                                         <tr key={i} id={d.LenId} onClick={e=>returnHandler(e)}>
                                             <td>{d.NFName}</td>

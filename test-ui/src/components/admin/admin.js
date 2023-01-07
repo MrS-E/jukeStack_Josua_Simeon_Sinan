@@ -3,6 +3,8 @@ import axios from "axios";
 import {useCookies} from "react-cookie";
 import Accordion from "react-bootstrap/Accordion";
 
+/*CODE NOT IN ACTIVE USE, COMBINES ALL THE LISTS OF ALL 3 ADMIN FRONTEND FILES*/
+
 function Admin(props) {
     const [cookies, setCookie] = useCookies(['user']);
     const [checked, changeCheck] = useState(false);
@@ -11,15 +13,15 @@ function Admin(props) {
     const [lendings, changeLend] = useState([])
     const [nfts, changeNFTs] = useState([])
 
-    useEffect( ()=> {
+    useEffect( ()=> { //check if user is admin
         axios.post(props.domain + "/admin/check", {user: cookies.name, pwd: cookies.pwd, attributes: {}})
              .then((res_check)=>{
-                 changeCheck(res_check.data[0].admin==="true"?true:false);
+                 changeCheck(res_check.data[0].admin === "true");
                  changeLoading(false)
         })
     },[])
 
-    useEffect(()=>{
+    useEffect(()=>{ //get all data if checked changes -> checked is confirmed
         if(checked){
             axios.post(props.domain+"/admin/all_users", {user:cookies.name, pwd:cookies.pwd,  attributes:{}})
                 .then((res_users)=>{ changeUsers(res_users.data)})
@@ -30,18 +32,19 @@ function Admin(props) {
         }
     }, [checked])
 
-    const userHandler = e => {
+    const userHandler = e => { //onclick handler -> no functionality
         console.log(e.currentTarget.id)
     }
 
-    const lendHandler = e => {
+    const lendHandler = e => { //onclick handler -> no functionality
         console.log(e.currentTarget.id)
     }
 
-    const nftHandler = e => {
+    const nftHandler = e => { //onclick handler -> no functionality
         console.log(e.currentTarget.id)
     }
 
+    /*HTML OUTPUT*/
     if(checked && !loading) {
         return (
             <div className="mt-4">

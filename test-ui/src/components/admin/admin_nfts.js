@@ -18,7 +18,7 @@ function AdminNfts(props) {
     const sub = useRef(null);
     const search = useRef(null)
 
-    useEffect(() => {
+    useEffect(() => { //check if user is admin + first fetch
         axios.post(props.domain + "/admin/check", {user: cookies.name, pwd: cookies.pwd, attributes: {}})
             .then((res_check) => {
                 changeCheck(res_check.data[0].admin === "true");
@@ -33,7 +33,7 @@ function AdminNfts(props) {
             })
     }, [])
 
-    const update_values = (typ, value) =>{
+    const update_values = (typ, value) =>{ //search via server + data array update
         switch (typ){
             case "search":
                 axios.post(props.domain+"/nft_search", {search: value}).then((res)=>{
@@ -48,7 +48,7 @@ function AdminNfts(props) {
         }
     }
     const new_nft = () => {
-        changeTrigger(false);
+        changeTrigger(false); //to add new nft to db over server with request
         axios.post(props.domain + "/admin/add_nft", {
             user: cookies.name,
             pwd: cookies.pwd,
@@ -62,12 +62,12 @@ function AdminNfts(props) {
                 //alert("NFT was added...")
                 update_values("normal")
         })
-        setTimeout(update_values, 10, "normal") //Workaround add_nft doesn't send response...
+        setTimeout(update_values, 100, "normal") //Workaround add_nft doesn't send response (always) (backend)...
     }
-    const delete_nft = token => {
-        if (window.confirm("Do you really want to delete Song, all connected lendings are lost to the void.") === true) {
+    const delete_nft = token => { //to delete nft
+        if (window.confirm("Do you really want to delete Song, all connected lendings are lost to the void.") === true) { //check for confirmation from admin
             changeTrigger(false);
-            axios.post(props.domain + "/admin/delete_nft", {
+            axios.post(props.domain + "/admin/delete_nft", { //server request to delete nft from db
                 user: cookies.name,
                 pwd: cookies.pwd,
                 attributes: {token: token}
@@ -81,15 +81,8 @@ function AdminNfts(props) {
         }
 
     }
-    const update_nft = (nft) =>{
+    const update_nft = (nft) =>{ //update nft with server request
         changeTrigger(false)
-        /*console.log({
-            token: nft.NFToken,
-            name: name.current.value!=="" ? name.current.value : nft.NFName,
-            interpret: interpret.current.value!=="" ? interpret.current.value : nft.NFInterpret,
-            lenght: lenght.current.value!=="" ? lenght.current.value : nft.NFLength,
-            year: year.current.value!=="" ? year.current.value : nft.NFYear
-        })*/
         axios.post(props.domain + "/admin/edit_nft", {
             user: cookies.name,
             pwd: cookies.pwd,
@@ -106,7 +99,7 @@ function AdminNfts(props) {
                 update_values("normal")
             })
     }
-    const edit_nft = nft => {
+    const edit_nft = nft => { //handler for button edit in popup
         changeValue(
             <div>
                 <h3>Edit NFT</h3>
@@ -134,7 +127,7 @@ function AdminNfts(props) {
         )
         changeTrigger(true)
     }
-    const add_nft = () => {
+    const add_nft = () => { //handler for button 'add nft' to open popup
         changeValue(
             <>
                 <h3>Add NFT</h3>
@@ -163,10 +156,10 @@ function AdminNfts(props) {
         );
         changeTrigger(true);
     }
-    const nftHandler = e => {
+    const nftHandler = e => { //handler for onclick in table on nft -> open popup
         let nft = {};
         for (let d of nfts) {
-            if (d.NFToken === e.currentTarget.id) {
+            if (d.NFToken === e.currentTarget.id) { //gets value from e
                 nft = d;
                 break;
             }
@@ -204,6 +197,7 @@ function AdminNfts(props) {
         changeTrigger(true);
     }
 
+    /*HTML OUTPUT*/
     if (checked && !loading) {
         return (
             <>

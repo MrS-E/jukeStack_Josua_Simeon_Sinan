@@ -4,11 +4,12 @@ import {BrowserRouter, Link, Route, Routes} from "react-router-dom";
 import {Nav, Navbar, NavLink} from "react-bootstrap";
 import Main from "./components/main";
 import 'bootstrap/dist/css/bootstrap.min.css';
-import { useCookies } from 'react-cookie';
+import { useCookies } from 'react-cookie'; //to use cookies
 
 function App() { //TESTED
-    const [cookies, setCookie] = useCookies(['user']);
-    const domain = "http://localhost:5000";
+    const [cookies, setCookie] = useCookies(['user']); //to set and get cookies to 'user'
+    const domain = "http://localhost:5000"; //so domain is only once defined
+    /*Stuff for login*/
     const user_ref = useRef(null);
     const pwd_ref = useRef(null);
     const sub_ref = useRef(null);
@@ -20,7 +21,7 @@ function App() { //TESTED
     const [failed, changeFailed] = useState("");
     const [admin, changeAdmin] = useState(false);
 
-    useEffect(()=>{
+    useEffect(()=>{ //autologin -> checks if cookies are defined and loges in the user
         if(cookies.name && cookies.pwd){
             changeNoRender(true);
             changeUser(cookies.name);
@@ -28,19 +29,19 @@ function App() { //TESTED
         }
     },[])
 
-    useEffect(() => {
-        if (noRender){
-            axios.post(domain + "/login", {mail: user, password: passwd}).then(
+    useEffect(() => { //login function to authenticate the user
+        if (noRender){ //so only a few useEffects go to server
+            axios.post(domain + "/login", {mail: user, password: passwd}).then( //gets verification from server
                 (res) => {
-                    changeLogin(res.data.login);
-                    changeAdmin(res.data.admin);
+                    changeLogin(res.data.login); //to login
+                    changeAdmin(res.data.admin); //to check if admin -> visible in navbar
                     if (!res.data.login) {
                         if (res.data.message){
                             changeFailed(res.data.message);
                         }else{
                             changeFailed("Wrong password or email.")
                         }
-                        sub_ref.current.removeAttribute("disabled");
+                        sub_ref.current.removeAttribute("disabled"); //to remove the set attribute in login button
                     }else{
                         setCookie('name', user, { path: '/' });
                         setCookie('pwd', passwd, { path: '/' });
@@ -51,16 +52,17 @@ function App() { //TESTED
         }
     }, [user, passwd, login])
 
-    const handleClick = () => {
-        sub_ref.current.setAttribute("disabled", true)
+    const handleClick = () => { //function which is triggered by clicking the login button
+        sub_ref.current.setAttribute("disabled", true) //sets attribute to login button
         changeFailed("");
-        changeUser(user_ref.current.value);
+        changeUser(user_ref.current.value); //sets values to useState so useEffect is triggered
         changePasswd(pwd_ref.current.value);
-        changeNoRender(true)
-        setTimeout(()=>{sub_ref.current.removeAttribute("disabled")}, 1000);
+        changeNoRender(true) //sets Render to true so useEffect can send request to server
+        setTimeout(()=>{sub_ref.current.removeAttribute("disabled")}, 1000) //if no response comes from the server button gets permanent disabled, to prevent this button attribute are removed after 1 second
     }
 
-    const mail_reg_ref = useRef(null);
+    /*Stuff for register*/
+    const mail_reg_ref = useRef(null); //hooks for register form
     const fname_reg_ref = useRef(null);
     const lname_reg_ref = useRef(null);
     const pwd_reg_ref = useRef(null);
@@ -68,13 +70,15 @@ function App() { //TESTED
     const [salu, setSalu] = useState("Sir");
     const [regFail, changeRegFail] = useState("")
 
-    const onOptionChange = e => {
+    const onOptionChange = e => {//function for radio button in register because no possible over useRef hook
         setSalu(e);
     }
 
-    const handleClick_register = () =>{
-        changeRegFail("");
-        sub_reg_ref.current.setAttribute("disabled", true);
+    //TODO password check with regex + null felder -> grenzen
+
+    const handleClick_register = () =>{ //function which is triggered by signup button
+        changeRegFail(""); //changes failure message to empty string
+        sub_reg_ref.current.setAttribute("disabled", true); //sets attribute to signup button
         axios.post(domain+"/register", {
             mail: mail_reg_ref.current.value,
             salutation: salu,
@@ -85,14 +89,15 @@ function App() { //TESTED
             .then((res) => {
                 if (!res.data.register) {
                     changeRegFail("Pls try again!");
-                    sub_reg_ref.current.removeAttribute("disabled");
+                    sub_reg_ref.current.removeAttribute("disabled"); //removes disabled attribute in signup button if register was not successful
                 }else{
-                   window.location.href=window.location.href.replace("register","");
+                   window.location.href=window.location.href.replace("register",""); //if register was successful sets user to login page
                 }
             })
             .catch();
     }
 
+    //html code for not authorized users
     if (!login) { //TESTED
         return (
             <div>
@@ -207,7 +212,7 @@ function App() { //TESTED
                                         </div>
                                         <span className="text-right text-danger mt-2">{failed}</span>
                                         <p className="forgot-password text-right mt-2">
-                                            {/*Forgot <a href="#">password?</a> {/*TODO forgotten password*/}
+                                            {/*Forgot <a href="#">password?</a> {/*forgotten password (not in use)*/}
                                         </p>
                                     </div>
                                 </div>
@@ -218,7 +223,7 @@ function App() { //TESTED
             </div>
         );
     }
-    else{
+    else{ //html code for authorized users
         return (
             <Main user={user} domain={domain} admin={admin}/>
         );
