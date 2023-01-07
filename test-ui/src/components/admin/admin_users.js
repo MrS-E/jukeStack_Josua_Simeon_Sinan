@@ -45,11 +45,19 @@ function AdminUsers(props) {
         }
     }
     const deleteUser = mail =>{
-        changeTrigger(false)
-        axios.post(props.domain+"/admin/remove_user", {user: cookies.name, pwd: cookies.pwd, attributes: {usMail: mail}}).then((res)=>{
-            update_data("normal");
-            alert("user " + mail + " deleted");
-        })
+        if (window.confirm("Do you really want to delete this user. He can't visit the site again... ヽ༼ ಠ益ಠ ༽ﾉ") === true) {
+            changeTrigger(false)
+            axios.post(props.domain + "/admin/remove_user", {
+                user: cookies.name,
+                pwd: cookies.pwd,
+                attributes: {usMail: mail}
+            }).then(() => {
+                update_data("normal");
+                alert("user " + mail + " deleted");
+            })
+        }else{
+            alert("Deletion was stopped ☜(⌒▽⌒)☞")
+        }
     }
     const editAdminStatus = (role, mail) => {
         changeTrigger(false)

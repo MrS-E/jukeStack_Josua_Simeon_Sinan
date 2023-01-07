@@ -8,7 +8,7 @@ import { useCookies } from 'react-cookie';
 
 function App() { //TESTED
     const [cookies, setCookie] = useCookies(['user']);
-    const domain = "http://localhost:5000";
+    const domain = "http://192.168.1.107:5000";
     const user_ref = useRef(null);
     const pwd_ref = useRef(null);
     const sub_ref = useRef(null);
@@ -57,6 +57,7 @@ function App() { //TESTED
         changeUser(user_ref.current.value);
         changePasswd(pwd_ref.current.value);
         changeNoRender(true)
+        setTimeout(()=>{sub_ref.current.removeAttribute("disabled")}, 1000);
     }
 
     const mail_reg_ref = useRef(null);

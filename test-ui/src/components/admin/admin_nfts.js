@@ -48,7 +48,6 @@ function AdminNfts(props) {
         }
     }
     const new_nft = () => {
-        sub.current.setAttribute("disabled", true)
         changeTrigger(false);
         axios.post(props.domain + "/admin/add_nft", {
             user: cookies.name,
@@ -59,33 +58,38 @@ function AdminNfts(props) {
                 length: "00:" + lenght.current.value.toString(),
                 year: year.current.value.toString().length===4?year.current.value:year.current.value===3?"0"+year.current.value.toString():year.current.value===2?"00"+year.current.value.toString():year.current.value===1?"000"+year.current.value.toString():"0000"
             }
-        }).then((res) => {
+        }).then(() => {
                 //alert("NFT was added...")
-                sub.current.removeAttribute("disabled")
                 update_values("normal")
         })
+        setTimeout(update_values, 10, "normal") //Workaround add_nft doesn't send response...
     }
     const delete_nft = token => {
-        changeTrigger(false);
-        axios.post(props.domain + "/admin/delete_nft", {
-            user: cookies.name,
-            pwd: cookies.pwd,
-            attributes: {token: token}
-        })
-            .then(() => {
-                //alert("NFT is deleted");
-                update_values("normal")
+        if (window.confirm("Do you really want to delete Song, all connected lendings are lost to the void.") === true) {
+            changeTrigger(false);
+            axios.post(props.domain + "/admin/delete_nft", {
+                user: cookies.name,
+                pwd: cookies.pwd,
+                attributes: {token: token}
             })
+                .then(() => {
+                    //alert("NFT is deleted");
+                    update_values("normal")
+                })
+        } else {
+            alert("Deletion was stoped")
+        }
+
     }
     const update_nft = (nft) =>{
         changeTrigger(false)
-        console.log({
+        /*console.log({
             token: nft.NFToken,
             name: name.current.value!=="" ? name.current.value : nft.NFName,
             interpret: interpret.current.value!=="" ? interpret.current.value : nft.NFInterpret,
             lenght: lenght.current.value!=="" ? lenght.current.value : nft.NFLength,
             year: year.current.value!=="" ? year.current.value : nft.NFYear
-        })
+        })*/
         axios.post(props.domain + "/admin/edit_nft", {
             user: cookies.name,
             pwd: cookies.pwd,
@@ -94,7 +98,7 @@ function AdminNfts(props) {
                 name: name.current.value!=="" ? name.current.value : nft.NFName,
                 interpret: interpret.current.value!=="" ? interpret.current.value : nft.NFInterpret,
                 lenght: lenght.current.value!=="" ? lenght.current.value : nft.NFLength,
-                year: year.current.value.toString().length===4?year.current.value:year.current.value===3?"0"+year.current.value.toString():year.current.value===2?"00"+year.current.value.toString():year.current.value===1?"000"+year.current.value.toString():"0000"
+                year: year.current.value.toString().length===4?year.current.value:year.current.value===3?"0"+year.current.value.toString():year.current.value===2?"00"+year.current.value.toString():year.current.value===1?"000"+year.current.value.toString():nft.NFYear
             }
         })
             .then(() => {
@@ -117,7 +121,7 @@ function AdminNfts(props) {
                 </Form.Group>
                 <Form.Group className="mb-3">
                     <Form.Label>Year</Form.Label>
-                    <Form.Control ref={year} type="number" min="1000" max="9999" placeholder={nft.NFYear}/>
+                    <Form.Control ref={year} type="number" aria-valuemin="1000" aria-valuemax="9999" placeholder={nft.NFYear}/>
                 </Form.Group>
                 <Form.Group className="mb-3">
                     <Form.Label>Song length</Form.Label>
@@ -210,11 +214,8 @@ function AdminNfts(props) {
                             <button className="btn btn-outline-info" onClick={add_nft}>Add NFT</button>
                         </div>
                         <div className="col-2"></div>
-                        <div className="col-6">
-                            <input type="text" ref={search} className="form-control" placeholder="Search"/>
-                        </div>
-                        <div className="col-2 float-end">
-                            <button className="btn btn-outline-info" onClick={()=>update_values("search", search.current.value)}>Search</button>
+                        <div className="col-8">
+                            <input type="text" ref={search} className="form-control" onChange={()=>update_values("search", search.current.value)} placeholder="Search"/>
                         </div>
                     </div>
                     <div className="row">

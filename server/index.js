@@ -253,7 +253,7 @@ function deleteUser(mail) {
             console.log("Remove User; select Lendings error: ", err);
         }
         for(let i = 0; i < res; i++) {
-            db.query("delete from TLendings where NFToken = (?)", [res[i]], (err) => {
+            db.query("update TLendings set LenEnd = now() where NFToken = (?)", [res[i]], (err) => {
                 if(err) {
                     console.log("Remove User; remove Lendings error: ", err);
                 }
@@ -329,6 +329,18 @@ app.post("/admin/:action", (req, res) => {
                     query.sql = "select * from TNFTSongs;";
                     break;
                 case "delete_nft":
+                    db.query("select LenID from TLendings where NFToken = (?)", [attr.token], (err, res) => {
+                        if(err) {
+                            console.log("Remove NFTSong; select Lendings error: ", err);
+                        }
+                        for(let i = 0; i < res; i++) {
+                            db.query("update TLendings set LenEnd = now() where LenId = (?)", [res[i]], (err) => {
+                                if(err) {
+                                    console.log("Remove NFTSong; remove Lendings error: ", err);
+                                }
+                            })
+                        }
+                    })
                     query.sql = "delete from TNFTSongs where NFToken=(?);";
                     query.values = [attr.token]
                     break;
@@ -355,7 +367,7 @@ app.post("/admin/:action", (req, res) => {
                         tokenName += "SPC"; //Space
                     }
                     // The next 2 letters are the last 2 digits of the song release year
-                    if (attr.year !== "0000") { //If year is not defined it is 0000
+                    if (attr.year < 1000) { //If year is not defined it is 0000
                         tokenName += attr.year.substring(2, 4);
                     } else {
                         tokenName += "00";
