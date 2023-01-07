@@ -88,11 +88,8 @@ function NFTAll(props) {
                 <div className="mt-4">
                     <h3>All NFTs</h3>
                     <div className="row">
-                        <div className="col-10">
-                            <input type="text" ref={search} className="form-control" placeholder="Search"/>
-                        </div>
-                        <div className="col-2 float-end">
-                            <button className="btn btn-outline-info" onClick={()=>update_values("search", search.current.value)}>Search</button>
+                        <div className="col-12">
+                            <input type="text" ref={search} className="form-control" onChange={()=>update_values("search", search.current.value)} placeholder="Search"/>
                         </div>
                     </div>
                     <div className="row">
