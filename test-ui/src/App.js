@@ -74,27 +74,40 @@ function App() { //TESTED
         setSalu(e);
     }
 
-    //TODO password check with regex + null felder -> grenzen
-
     const handleClick_register = () =>{ //function which is triggered by signup button
+        const pwd_regex = /^(?:(?:(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z]))|(?:(?=.*[a-z])(?=.*[A-Z])(?=.*[*.!@$%^&(){}[]:;<>,.?\/~_+-=|\]))|(?:(?=.*[0-9])(?=.*[A-Z])(?=.*[*.!@$%^&(){}[]:;<>,.?\/~_+-=|\]))|(?:(?=.*[0-9])(?=.*[a-z])(?=.*[*.!@$%^&(){}[]:;<>,.?\/~_+-=|\]))).{8,32}$/ //regex from https://www.ocpsoft.org/tutorials/regular-expressions/password-regular-expression/
+        const mail_regex = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/; //regex from https://emailregex.com/
+        console.log(pwd_regex.test(pwd_reg_ref.current.value))
         changeRegFail(""); //changes failure message to empty string
         sub_reg_ref.current.setAttribute("disabled", true); //sets attribute to signup button
-        axios.post(domain+"/register", {
-            mail: mail_reg_ref.current.value,
-            salutation: salu,
-            firstName: fname_reg_ref.current.value,
-            lastName: lname_reg_ref.current.value,
-            password: pwd_reg_ref.current.value
-        })
-            .then((res) => {
-                if (!res.data.register) {
-                    changeRegFail("Pls try again!");
-                    sub_reg_ref.current.removeAttribute("disabled"); //removes disabled attribute in signup button if register was not successful
-                }else{
-                   window.location.href=window.location.href.replace("register",""); //if register was successful sets user to login page
-                }
+        if(pwd_regex.test(pwd_reg_ref.current.value) || mail_regex.test(mail_reg_ref.current.value)) {
+            axios.post(domain + "/register", {
+                mail: mail_reg_ref.current.value,
+                salutation: salu,
+                firstName: fname_reg_ref.current.value===""?"-":fname_reg_ref.current.value,
+                lastName: lname_reg_ref.current.value===""?"-":lname_reg_ref.current.value,
+                password: pwd_reg_ref.current.value
             })
-            .catch();
+                .then((res) => {
+                    if (!res.data.register) {
+                        changeRegFail("Pls try again!");
+                        sub_reg_ref.current.removeAttribute("disabled"); //removes disabled attribute in signup button if register was not successful
+                    } else {
+                        window.location.href = window.location.href.replace("register", ""); //if register was successful sets user to login page
+                    }
+                })
+                .catch();
+        }else{
+            if(pwd_regex.test(pwd_reg_ref.current.value)){
+                changeRegFail("Please check if password matches requirements.");
+            }else if(mail_regex.test(mail_reg_ref.current.value)){
+                changeRegFail("Please check if mail is defined and is a viable email address.");
+            }
+            else{
+                changeRegFail("Please check if mail is defined and password matches requirements.");
+            }
+            sub_reg_ref.current.removeAttribute("disabled");
+        }
     }
 
     //html code for not authorized users
@@ -169,6 +182,7 @@ function App() { //TESTED
                                                 className="form-control mt-1"
                                                 placeholder="Enter password"
                                             />
+                                            <span className="fs-6" >Please use 8 and more letters but less then 50, at least one digit, one lowercase character, one uppercase character, one special character</span>
                                         </div>
                                         <div className="d-grid gap-2 mt-3">
                                             <button
