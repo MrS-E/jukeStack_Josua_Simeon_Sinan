@@ -7,14 +7,14 @@ function NFTHistory(props) {
     const [nfts, changeNFTs] = useState([]);
     const [loading, changeLoading] = useState(true);
 
-    useEffect(() => {
+    useEffect(() => { //first fetch to get all data
         axios.post(props.domain+"/history", {mail: cookies.name, pwd: cookies.pwd}).then((res)=>{
             changeNFTs(res.data.history);
             changeLoading(false);
         })
     }, [])
 
-
+    /*HTML RETURN (VISIBLE CONTENT)*/
     if(!loading){
         return (
             <>
@@ -34,7 +34,7 @@ function NFTHistory(props) {
                                 </tr>
                                 </thead>
                                 <tbody>
-                                {nfts?nfts.map((d,i)=>{
+                                {nfts?nfts.map((d,i)=>{ //map to get data from array in table
                                     return(
                                         <tr key={i+"_"+d.NFToken+"_history"}>
                                             <td>{d.NFName}</td>
