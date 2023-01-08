@@ -36,9 +36,17 @@ function NFTRent(props) {
                 break;
             }
         }
+        let song, button
+        if(nft.NFAudio){
+            song = <div className="row"><div className="col-3"><strong>Audio:</strong></div><audio controls><source src={nft.NFAudio} type="audio/mpeg"/></audio></div>
+            button = <div className="col-6"><button className="btn btn-primary mt-4" onClick={()=>{alert("Not implemented...")}}>Download NFT</button></div>
+        }else{
+            song="";
+            button="";
+        }
         changeValue(
             <div>
-                <h3>Lending with RentId {nft.LenId}</h3>
+                <h3>Lending</h3>
                 <div className="row">
                     <div className="col-3"><strong>Name:</strong></div>
                     <div className="col-8">{nft.NFName}</div>
@@ -63,13 +71,12 @@ function NFTRent(props) {
                     <div className="col-3"><strong>Lending start:</strong></div>
                     <div className="col-8">{nft.LenDate}</div>
                 </div>
+                {song}
                 <div className="row">
                     <div className="col-6">
                         <button className="btn btn-primary mt-4" onClick={()=>{returner(nft.LenId);changeTrigger(false)}}>Return</button>
                     </div>
-                    <div className="col-6">
-                        <button className="btn btn-primary mt-4" onClick={()=>{alert("Not implemented...")}}>Listen to</button>
-                    </div>
+                    {button}
                 </div>
             </div>
         );

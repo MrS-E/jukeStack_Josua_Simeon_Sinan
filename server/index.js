@@ -38,7 +38,8 @@ const axios = require("axios")
 
 const app = express();
 app.use(cors());
-app.use(express.json()); //to manage the parsing of the body from react app
+app.use(express.json({limit: '50mb'})); //sets data limit of parsing in body to 50mb //to manage the parsing of the body from react app
+app.use(express.urlencoded({limit: '50mb'})); //sets data limit of parsing in url to 50mb
 
 const db = mysql.createConnection({ //DB Connection
     user: "jukSiSiJo",
@@ -190,7 +191,7 @@ app.post("/lendings", (req, res) => { //TESTED
     const userPwd = req.body.pwd;
     axios.post(domain + "/login", {mail: userMail, password: userPwd}).then((response) => {
         if (response.data.login) {
-            db.query("select distinct LenId, NFToken, UsFName, USSName, NFName, NFInterpret, NFLength, NFYear, concat(date_format(LenStart, '%d %M %Y'),' ', time_format(LenStart, '%H:%i:%s')) as LenDate from TUsers natural join TLendings l natural join TNFTSongs where l.UsMail = (?) and LenEnd is null;",
+            db.query("select distinct LenId, NFToken, UsFName, USSName, NFName, NFInterpret, NFLength, NFYear, NFAudio, concat(date_format(LenStart, '%d %M %Y'),' ', time_format(LenStart, '%H:%i:%s')) as LenDate from TUsers natural join TLendings l natural join TNFTSongs where l.UsMail = (?) and LenEnd is null;",
                 [userMail],
                 (err, result) => {
                     if (err) {
@@ -442,7 +443,7 @@ app.post("/admin/:action", (req, res) => {
                             }
                             tok(tokenN);
                         } else {
-                            db.query("insert into TNFTSongs (NFToken, NFInterpret, NFName, NFLength, NFYear) values (?, ?, ?, ?, ?)", [tokenN, attr.interpret, attr.name, attr.length, attr.year]);
+                            db.query("insert into TNFTSongs (NFToken, NFInterpret, NFName, NFLength, NFYear, NFAudio) values (?, ?, ?, ?, ?, ?)", [tokenN, attr.interpret, attr.name, attr.length, attr.year, attr.audio]);
                         }
                     });
                 }

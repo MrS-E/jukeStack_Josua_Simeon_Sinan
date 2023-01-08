@@ -16,12 +16,14 @@ function AdminNfts(props) {
     const year = useRef(null);
     const lenght = useRef(null);
     const sub = useRef(null);
-    const search = useRef(null)
+    const search = useRef(null);
+    const audio = useRef(null)
+
 
     useEffect(() => { //check if user is admin + first fetch
         axios.post(props.domain + "/admin/check", {user: cookies.name, pwd: cookies.pwd, attributes: {}})
             .then((res_check) => {
-                changeCheck(res_check.data[0].admin === "true");
+                changeCheck(res_check?res_check.data[0].admin === "true":false);
                 if (res_check.data[0].admin === "true") {
                     axios.post(props.domain + "/admin/nfts", {user: cookies.name, pwd: cookies.pwd}).then((res) => {
                         changeNFTs(res.data);
@@ -48,21 +50,28 @@ function AdminNfts(props) {
         }
     }
     const new_nft = () => {
-        changeTrigger(false); //to add new nft to db over server with request
-        axios.post(props.domain + "/admin/add_nft", {
-            user: cookies.name,
-            pwd: cookies.pwd,
-            attributes: {
-                interpret: interpret.current.value,
-                name: name.current.value,
-                length: "00:" + lenght.current.value.toString(),
-                year: year.current.value.toString().length===4?year.current.value:year.current.value===3?"0"+year.current.value.toString():year.current.value===2?"00"+year.current.value.toString():year.current.value===1?"000"+year.current.value.toString():"0000"
-            }
-        }).then(() => {
+        let reader = new FileReader();
+        reader.readAsDataURL(audio.current.files[0]);
+        reader.onload = () => {
+            changeTrigger(false); //to add new nft to db over server with request
+            axios.post(props.domain + "/admin/add_nft", {
+                user: cookies.name,
+                pwd: cookies.pwd,
+                attributes: {
+                    interpret: interpret.current.value,
+                    name: name.current.value,
+                    length: "00:" + lenght.current.value.toString(),
+                    year: year.current.value.toString().length===4?year.current.value:year.current.value===3?"0"+year.current.value.toString():year.current.value===2?"00"+year.current.value.toString():year.current.value===1?"000"+year.current.value.toString():"0000",
+                    audio: reader.result?reader.result:null
+                }
+            }).then(() => {
                 //alert("NFT was added...")
                 update_values("normal")
-        })
-        setTimeout(update_values, 100, "normal") //Workaround add_nft doesn't send response (always) (backend)...
+            })
+            setTimeout(update_values, 100, "normal") //Workaround add_nft doesn't send response (always) (backend)...
+        }
+        reader.onerror = (error) => {
+        }
     }
     const delete_nft = token => { //to delete nft
         if (window.confirm("Do you really want to delete Song, all connected lendings are lost to the void.") === true) { //check for confirmation from admin
@@ -147,6 +156,10 @@ function AdminNfts(props) {
                     <Form.Group className="mb-3">
                         <Form.Label>Song length</Form.Label>
                         <Form.Control ref={lenght} type="time" placeholder="Enter length" aria-valuemin="00:01" aria-required/>
+                    </Form.Group>
+                    <Form.Group className="mb-3">
+                        <Form.Label>Song File</Form.Label>
+                        <Form.Control type="file" aria-required ref={audio} accept=".mp3"/>
                     </Form.Group>
                     <Button ref={sub} variant="primary" type="button" onClick={new_nft}>
                         Submit

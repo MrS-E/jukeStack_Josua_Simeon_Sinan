@@ -42,6 +42,7 @@ create table TNFTSongs (
     NFInterpret varchar(45),
     NFName varchar(80) not null,
     NFLength time not null,
-    NFYear char(4)
+    NFYear char(4),
+    NFAudio text -- not blob (large-blob) because of many errors and inconveniences in the decoding process
 );
 
