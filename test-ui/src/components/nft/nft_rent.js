@@ -36,13 +36,11 @@ function NFTRent(props) {
                 break;
             }
         }
-        let song, button
+        let song
         if(nft.NFAudio){
-            song = <div className="row"><div className="col-3"><strong>Audio:</strong></div><audio controls><source src={nft.NFAudio} type="audio/mpeg"/></audio></div>
-            button = <div className="col-6"><button className="btn btn-primary mt-4" onClick={()=>{alert("Not implemented...")}}>Download NFT</button></div>
+            song = <div className="row"><div className="col-3"><strong>Audio:</strong></div><audio className="mt-2" controls><source src={nft.NFAudio} type="audio/mpeg"/></audio></div>
         }else{
             song="";
-            button="";
         }
         changeValue(
             <div>
@@ -76,7 +74,6 @@ function NFTRent(props) {
                     <div className="col-6">
                         <button className="btn btn-primary mt-4" onClick={()=>{returner(nft.LenId);changeTrigger(false)}}>Return</button>
                     </div>
-                    {button}
                 </div>
             </div>
         );
