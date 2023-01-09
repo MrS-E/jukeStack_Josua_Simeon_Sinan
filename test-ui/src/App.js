@@ -8,7 +8,7 @@ import { useCookies } from 'react-cookie'; //to use cookies
 
 function App() { //TESTED
     const [cookies, setCookie] = useCookies(['user']); //to set and get cookies to 'user'
-    const domain = "http://localhost:5000"; //so domain is only once defined
+    const domain = "http://10.140.0.40:5000"; //so domain is only once defined
     /*Stuff for login*/
     const user_ref = useRef(null);
     const pwd_ref = useRef(null);

@@ -9,6 +9,7 @@ function NFTRent(props) {
     const [loading, changeLoading] = useState(true);
     const [trigger, changeTrigger] = useState(false)
     const [value, changeValue] = useState("");
+    const [song, changeSong] = useState("");
 
     useEffect(() => { //fist load of all lendings of user (on load of page)
         axios.post(props.domain + "/lendings", {user: cookies.name, pwd: cookies.pwd}).then((res)=>{
@@ -36,11 +37,14 @@ function NFTRent(props) {
                 break;
             }
         }
-        let song
+        console.log(nft)
         if(nft.NFAudio){
-            song = <div className="row"><div className="col-3"><strong>Audio:</strong></div><audio className="mt-2" controls><source src={nft.NFAudio} type="audio/mpeg"/></audio></div>
-        }else{
-            song="";
+            console.log(nft.NFAudio)
+            let file = new FileReader()
+            file.onload = () => {
+                changeSong(<div className="row"><div className="col-3"><strong>Audio:</strong></div><audio className="mt-2" controls><source src={nft.NFAudio} type="audio/mpeg"/></audio></div>)
+            }
+
         }
         changeValue(
             <div>
