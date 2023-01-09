@@ -191,7 +191,7 @@ app.post("/lendings", (req, res) => { //TESTED
     const userPwd = req.body.pwd;
     axios.post(domain + "/login", {mail: userMail, password: userPwd}).then((response) => {
         if (response.data.login) {
-            db.query("select distinct LenId, NFToken, UsFName, USSName, NFName, NFInterpret, NFLength, NFYear, NFAudio, concat(date_format(LenStart, '%d %M %Y'),' ', time_format(LenStart, '%H:%i:%s')) as LenDate from TUsers natural join TLendings l natural join TNFTSongs where l.UsMail = (?) and LenEnd is null;",
+            db.query("select distinct LenId, NFToken, UsFName, USSName, NFName, NFInterpret, NFLength, NFYear, cast(NFAudio as char) as NFAudio, concat(date_format(LenStart, '%d %M %Y'),' ', time_format(LenStart, '%H:%i:%s')) as LenDate from TUsers natural join TLendings l natural join TNFTSongs where l.UsMail = (?) and LenEnd is null;",
                 [userMail],
                 (err, result) => {
                     if (err) {

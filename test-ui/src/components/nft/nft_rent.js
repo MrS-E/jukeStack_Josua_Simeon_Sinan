@@ -9,7 +9,6 @@ function NFTRent(props) {
     const [loading, changeLoading] = useState(true);
     const [trigger, changeTrigger] = useState(false)
     const [value, changeValue] = useState("");
-    const [song, changeSong] = useState("");
 
     useEffect(() => { //fist load of all lendings of user (on load of page)
         axios.post(props.domain + "/lendings", {user: cookies.name, pwd: cookies.pwd}).then((res)=>{
@@ -36,15 +35,6 @@ function NFTRent(props) {
                 nft=d;
                 break;
             }
-        }
-        console.log(nft)
-        if(nft.NFAudio){
-            console.log(nft.NFAudio)
-            let file = new FileReader()
-            file.onload = () => {
-                changeSong(<div className="row"><div className="col-3"><strong>Audio:</strong></div><audio className="mt-2" controls><source src={nft.NFAudio} type="audio/mpeg"/></audio></div>)
-            }
-
         }
         changeValue(
             <div>
@@ -73,7 +63,10 @@ function NFTRent(props) {
                     <div className="col-3"><strong>Lending start:</strong></div>
                     <div className="col-8">{nft.LenDate}</div>
                 </div>
-                {song}
+                <div className="row">
+                    <div className="col-3"><strong>Audio:</strong></div>
+                    <audio className="mt-2" controls><source src={nft.NFAudio} type="audio/mpeg"/></audio>
+                </div>
                 <div className="row">
                     <div className="col-6">
                         <button className="btn btn-primary mt-4" onClick={()=>{returner(nft.LenId);changeTrigger(false)}}>Return</button>

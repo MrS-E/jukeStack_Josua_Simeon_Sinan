@@ -51,10 +51,9 @@ function AdminNfts(props) {
     }
     const new_nft = () => {
         let reader = new FileReader();
-        reader.readAsArrayBuffer(audio.current.files[0]);
+        reader.readAsDataURL(audio.current.files[0]);
         reader.onload = () => {
             changeTrigger(false); //to add new nft to db over server with request
-            console.log(new Blob(reader.result));
             axios.post(props.domain + "/admin/add_nft", {
                 user: cookies.name,
                 pwd: cookies.pwd,
@@ -63,15 +62,13 @@ function AdminNfts(props) {
                     name: name.current.value,
                     length: "00:" + lenght.current.value.toString(),
                     year: year.current.value.toString().length===4?year.current.value:year.current.value===3?"0"+year.current.value.toString():year.current.value===2?"00"+year.current.value.toString():year.current.value===1?"000"+year.current.value.toString():"0000",
-                    audio: reader.result?reader.result:'-'
+                    audio: reader.result?reader.result:null
                 }
             }).then(() => {
                 //alert("NFT was added...")
                 update_values("normal")
             })
             setTimeout(update_values, 100, "normal") //Workaround add_nft doesn't send response (always) (backend)...
-        }
-        reader.onerror = (error) => {
         }
     }
     const delete_nft = token => { //to delete nft
