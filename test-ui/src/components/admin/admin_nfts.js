@@ -70,8 +70,6 @@ function AdminNfts(props) {
             })
             setTimeout(update_values, 100, "normal") //Workaround add_nft doesn't send response (always) (backend)...
         }
-        reader.onerror = (error) => {
-        }
     }
     const delete_nft = token => { //to delete nft
         if (window.confirm("Do you really want to delete Song, all connected lendings are lost to the void.") === true) { //check for confirmation from admin
