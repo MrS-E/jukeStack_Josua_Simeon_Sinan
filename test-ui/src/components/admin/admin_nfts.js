@@ -50,10 +50,27 @@ function AdminNfts(props) {
         }
     }
     const new_nft = () => {
-        let reader = new FileReader();
-        reader.readAsDataURL(audio.current.files[0]);
-        reader.onload = () => {
-            changeTrigger(false); //to add new nft to db over server with request
+        if(audio.current.files[0]) {
+            let reader = new FileReader();
+            reader.readAsDataURL(audio.current.files[0]);
+            reader.onload = () => {
+                axios.post(props.domain + "/admin/add_nft", {
+                    user: cookies.name,
+                    pwd: cookies.pwd,
+                    attributes: {
+                        interpret: interpret.current.value,
+                        name: name.current.value,
+                        length: "00:" + lenght.current.value.toString(),
+                        year: year.current.value.toString().length === 4 ? year.current.value : year.current.value === 3 ? "0" + year.current.value.toString() : year.current.value === 2 ? "00" + year.current.value.toString() : year.current.value === 1 ? "000" + year.current.value.toString() : "0000",
+                        audio: reader.result ? reader.result : null
+                    }
+                }).then(() => {
+                    //alert("NFT was added...")
+                    update_values("normal")
+                })
+                setTimeout(update_values, 100, "normal") //Workaround add_nft doesn't send response (always) (backend)...
+            }
+        }else{
             axios.post(props.domain + "/admin/add_nft", {
                 user: cookies.name,
                 pwd: cookies.pwd,
@@ -61,8 +78,8 @@ function AdminNfts(props) {
                     interpret: interpret.current.value,
                     name: name.current.value,
                     length: "00:" + lenght.current.value.toString(),
-                    year: year.current.value.toString().length===4?year.current.value:year.current.value===3?"0"+year.current.value.toString():year.current.value===2?"00"+year.current.value.toString():year.current.value===1?"000"+year.current.value.toString():"0000",
-                    audio: reader.result?reader.result:null
+                    year: year.current.value.toString().length === 4 ? year.current.value : year.current.value === 3 ? "0" + year.current.value.toString() : year.current.value === 2 ? "00" + year.current.value.toString() : year.current.value === 1 ? "000" + year.current.value.toString() : "0000",
+                    audio: null
                 }
             }).then(() => {
                 //alert("NFT was added...")
@@ -70,6 +87,7 @@ function AdminNfts(props) {
             })
             setTimeout(update_values, 100, "normal") //Workaround add_nft doesn't send response (always) (backend)...
         }
+        changeTrigger(false); //to add new nft to db over server with request
     }
     const delete_nft = token => { //to delete nft
         if (window.confirm("Do you really want to delete Song, all connected lendings are lost to the void.") === true) { //check for confirmation from admin

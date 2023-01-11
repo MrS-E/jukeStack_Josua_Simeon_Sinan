@@ -156,6 +156,7 @@ app.post("/lend", (req, res) => { //TESTED
                         console.log("lend (select) error: ", err)
                         res.send({lend: false, error: err})
                     } else {
+                        console.log(result)
                         if (result[0].amount < 5) {
                             db.query("select count(*) as lent from TLendings where NFToken = (?) and LenEnd is null;",
                                 [token], (err, result) => {
