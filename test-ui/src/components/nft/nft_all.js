@@ -40,7 +40,7 @@ function NFTAll(props) {
             }
         }
         /*POPUP HTML*/
-        console.log(nft);
+        //Wconsole.log(nft);
         let button = "";
         if(nft.NFRented===1){
             button = <button className="btn btn-primary mt-4" disabled={true}>Lend</button>

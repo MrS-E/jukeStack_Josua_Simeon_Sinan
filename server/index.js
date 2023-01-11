@@ -156,7 +156,6 @@ app.post("/lend", (req, res) => { //TESTED
                         console.log("lend (select) error: ", err)
                         res.send({lend: false, error: err})
                     } else {
-                        console.log(result)
                         if (result[0].amount < 5) {
                             db.query("select count(*) as lent from TLendings where NFToken = (?) and LenEnd is null;",
                                 [token], (err, result) => {
@@ -273,7 +272,7 @@ app.post("/update", (req, res) => { //TESTED
                 console.log("update error: ", Date.now(), ":", err);
                 res.send({update: false, error: err})
             } else {
-                console.log(result);
+                //console.log(result);
                 res.send({update: true, result: result});
             }
         }
@@ -440,7 +439,7 @@ app.post("/admin/:action", (req, res) => {
                             }
                             if (!letterAtEnd) { // if there is no letter at the end then set it to a
                                 tokenN = tokenN.substring(0, 15) + abc.charAt(0);
-                                console.log("Changed A " + tokenN);
+                                //console.log("Changed A " + tokenN);
                             }
                             tok(tokenN);
                         } else {
