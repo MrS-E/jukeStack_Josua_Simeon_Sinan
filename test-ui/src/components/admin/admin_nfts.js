@@ -50,6 +50,10 @@ function AdminNfts(props) {
         }
     }
     const new_nft = () => {
+        const interpret_ = interpret.current.value;
+        const name_ = name.current.value
+        const lenght_ = lenght.current.value.toString();
+        const year_ = year.current.value.toString();
         if(audio.current.files[0]) {
             let reader = new FileReader();
             reader.readAsDataURL(audio.current.files[0]);
@@ -58,10 +62,10 @@ function AdminNfts(props) {
                     user: cookies.name,
                     pwd: cookies.pwd,
                     attributes: {
-                        interpret: interpret.current.value,
-                        name: name.current.value,
-                        length: "00:" + lenght.current.value.toString(),
-                        year: year.current.value.toString().length === 4 ? year.current.value : year.current.value === 3 ? "0" + year.current.value.toString() : year.current.value === 2 ? "00" + year.current.value.toString() : year.current.value === 1 ? "000" + year.current.value.toString() : "0000",
+                        interpret: interpret_,
+                        name: name_,
+                        length: "00:" + lenght_,
+                        year: year_.length === 4 ? year_ : year_.length === 3 ? "0" + year_ : year_.length === 2 ? "00" + year_ : year_.length === 1 ? "000" + year_ : "0000",
                         audio: reader.result ? reader.result : null
                     }
                 }).then(() => {
@@ -75,10 +79,10 @@ function AdminNfts(props) {
                 user: cookies.name,
                 pwd: cookies.pwd,
                 attributes: {
-                    interpret: interpret.current.value,
-                    name: name.current.value,
-                    length: "00:" + lenght.current.value.toString(),
-                    year: year.current.value.toString().length === 4 ? year.current.value : year.current.value === 3 ? "0" + year.current.value.toString() : year.current.value === 2 ? "00" + year.current.value.toString() : year.current.value === 1 ? "000" + year.current.value.toString() : "0000",
+                    interpret: interpret_,
+                    name: name_,
+                    length: "00:" + lenght_,
+                    year: year_.length === 4 ? year_ : year_.length === 3 ? "0" + year_ : year_.length === 2 ? "00" + year_ : year_.length === 1 ? "000" + year_ : "0000",
                     audio: null
                 }
             }).then(() => {
