@@ -78,7 +78,7 @@ function App() { //TESTED
     const handleClick_register = () =>{ //function which is triggered by signup button
         const pwd_regex = /^(?:(?:(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z]))|(?:(?=.*[a-z])(?=.*[A-Z])(?=.*[*.!@$%^&(){}[]:;<>,.?\/~_+-=|\]))|(?:(?=.*[0-9])(?=.*[A-Z])(?=.*[*.!@$%^&(){}[]:;<>,.?\/~_+-=|\]))|(?:(?=.*[0-9])(?=.*[a-z])(?=.*[*.!@$%^&(){}[]:;<>,.?\/~_+-=|\]))).{8,32}$/ //regex from https://www.ocpsoft.org/tutorials/regular-expressions/password-regular-expression/
         const mail_regex = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/; //regex from https://emailregex.com/
-        console.log(pwd_regex.test(pwd_reg_ref.current.value))
+        //console.log(pwd_regex.test(pwd_reg_ref.current.value))
         changeRegFail(""); //changes failure message to empty string
         sub_reg_ref.current.setAttribute("disabled", true); //sets attribute to signup button
         if(pwd_regex.test(pwd_reg_ref.current.value) || mail_regex.test(mail_reg_ref.current.value)) {
