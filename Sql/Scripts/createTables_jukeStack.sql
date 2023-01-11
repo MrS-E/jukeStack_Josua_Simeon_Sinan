@@ -11,8 +11,8 @@ History:
 Version	Date		Who	Changes
 1.0  	2022-12-13	JP	created
 1.1		2023-01-02	JP	added UsRole to TUsers
-1.2		2023-01-06	JP increased autoincremnt of TLendings
-
+1.2		2023-01-06	JP 	increased autoincremnt of TLendings
+2.0		2023-01-08	JP	added longblob to TNFTSongs
 Copyright ©2022 Josua Panzera
 */
 use jukeStackDB_SimeonSinanJosua;
@@ -24,14 +24,14 @@ create  table TUsers (
     UsFName varchar(45) not null,
     UsSName varchar(45) not null,
     UsPasswd char(64) not null,
-    UsRole enum('user','admin') not null default('user')
+    UsRole enum('user','admin') not null
 );
 -- Table TLendings
 drop table if exists TLendings;
 create table TLendings (
 	LenId int unsigned auto_increment not null primary key,
     LenStart timestamp not null,
-    LenEnd timestamp,
+    LenEnd timestamp null,
     NFToken char(16) not null,
     UsMail varchar(55) not null
 )auto_increment = 100000000;
@@ -39,10 +39,10 @@ create table TLendings (
 drop table if exists TNFTSongs;
 create table TNFTSongs (
 	NFToken char(16) not null,
-    NFInterpret varchar(45),
+    NFInterpret varchar(45) null,
     NFName varchar(80) not null,
     NFLength time not null,
-    NFYear char(4),
-    NFAudio text -- not blob (large-blob) because of many errors and inconveniences in the decoding process
+    NFYear char(4) null,
+    NFAudio longblob null
 );
 
