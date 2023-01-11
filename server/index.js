@@ -371,7 +371,7 @@ app.post("/admin/:action", (req, res) => {
                     query.sql = "select LenId,UsMail, NFToken, NFName, NFInterpret, concat(date_format(LenStart, '%d.%m.%Y'),' ', time_format(LenStart, '%H:%i:%s')) as LenDateStart, concat(date_format(LenEnd, '%d.%m.%Y'),' ', time_format(LenEnd, '%H:%i:%s')) as LenDateEnd from TLendings natural join TNFTSongs order by LenStart desc;";
                     break;
                 // 13.9 return a lending (/return_lending)
-                case "retrun_lending":
+                case "return_lending":
                     query.sql = "update TLendings set LenEnd = now() where LenId=(?);";
                     query.values = [attr.lenId];
                     break;

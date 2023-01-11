@@ -60,10 +60,6 @@ function NFTRent(props) {
                     <div className="col-8">{nft.LenDate}</div>
                 </div>
                 <div className="row">
-                    <div className="col-3"><strong>Lending start:</strong></div>
-                    <div className="col-8">{nft.LenDate}</div>
-                </div>
-                <div className="row">
                     <div className="col-3"><strong>Audio:</strong></div>
                     <audio className="mt-2" controls><source src={nft.NFAudio} type="audio/mpeg"/></audio>
                 </div>
