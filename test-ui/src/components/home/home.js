@@ -53,10 +53,10 @@ function Home(props) {
                         </tr>
                         </thead>
                         <tbody>
-                        {d.result.length>0?d.result.map((d,i)=>{ //displays the last 5 added nfts
+                        {d.result.length>0?d.result.reverse().map((d,i)=>{ //displays the last 5 added nfts
                             if(i<5) {
                                 return (
-                                    <tr key={i + d.NFToken + "all"} id={d.NFToken}>
+                                    <tr key={i + "_" + d.NFToken + "all"} id={d.NFToken}>
                                         <td>{d.NFName}</td>
                                         <td>{d.NFInterpret}</td>
                                         <td>{d.NFYear}</td>
