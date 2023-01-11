@@ -132,7 +132,7 @@ app.post("/history", (req, res) => { //TESTED
 }) //TESTED
 // 5. NFTSongs List (/list)
 app.get("/list", (req, res) => { //TESTED
-    db.query("select NFToken, NFInterpret, NFName, NFLength, NFYear, NFAudio, if(NFToken in (select NFToken from TLendings where LenEnd is null), true, false) as NFRented from TNFTSongs order by NFName, NFInterpret asc;",
+    db.query("select NFToken, NFInterpret, NFName, NFLength, NFYear, NFAudio, if(NFToken in (select NFToken from TLendings where LenEnd is null), true, false) as NFRented from TNFTSongs;",
         (err, result) => {
             if (err) {
                 console.log("list error: ", err);
@@ -282,7 +282,7 @@ app.post("/update", (req, res) => { //TESTED
 //11. Search NFTSong (/nft_search)
 app.post("/nft_search", (req, res) => {
     const search = req.body.search;
-    db.query("select  NFToken, NFInterpret, NFName, NFLength, NFYear, NFAudio, if(NFToken in (select NFToken from TLendings where LenEnd is null), true, false) as NFRented from TNFTSongs where locate ((?), NFToken) or locate ((?), NFInterpret) or locate ((?), NFName) or locate ((?), NFYear) order by NFName, NFInterpret asc;", [search, search, search, search], (err, response) => {
+    db.query("select  NFToken, NFInterpret, NFName, NFLength, NFYear, NFAudio, if(NFToken in (select NFToken from TLendings where LenEnd is null), true, false) as NFRented from TNFTSongs where locate ((?), NFToken) or locate ((?), NFInterpret) or locate ((?), NFName) or locate ((?), NFYear);", [search, search, search, search], (err, response) => {
         if (err) {
             console.log("search error: ", err);
         } else {
