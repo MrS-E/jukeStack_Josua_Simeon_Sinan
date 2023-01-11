@@ -40,6 +40,13 @@ function NFTAll(props) {
             }
         }
         /*POPUP HTML*/
+        console.log(nft);
+        let button = "";
+        if(nft.NFRented===1){
+            button = <button className="btn btn-primary mt-4" disabled={true}>Lend</button>
+        }else{
+            button = <button className="btn btn-primary mt-4" onClick={()=>{lend(nft.NFToken);changeTrigger(false)}}>Lend</button>;
+        }
         changeValue(
             <div>
                 <h3>Lending</h3>
@@ -61,7 +68,7 @@ function NFTAll(props) {
                     <div className="col-8">{nft.NFLength}</div>
                 </div>
                 <div className="row">
-                    <button className="btn btn-primary mt-4" onClick={()=>{lend(nft.NFToken);changeTrigger(false)}}>Lend</button>
+                    {button}
                 </div>
             </div>
         );
@@ -103,6 +110,7 @@ function NFTAll(props) {
                                     <th>Interpret</th>
                                     <th>Length</th>
                                     <th>Year</th>
+                                    <th>Status</th>
                                 </tr>
                                 </thead>
                                 <tbody>
@@ -113,6 +121,7 @@ function NFTAll(props) {
                                             <td>{d.NFInterpret}</td>
                                             <td>{d.NFLength}</td>
                                             <td>{d.NFYear}</td>
+                                            <td>{d.NFRented===0?"Free":"Rented"}</td>
                                         </tr>
                                     );
                                 }) :
