@@ -42,10 +42,10 @@ app.use(express.json({limit: '50mb'})); //sets data limit of parsing in body to 
 app.use(express.urlencoded({limit: '50mb'})); //sets data limit of parsing in url to 50mb
 
 const db = mysql.createConnection({ //DB Connection
-    user: "jukSiSiJo",
-    host: "i-kf.ch",
+    user: "",
+    host: "",
     password: process.env.DB_KEY || require("./variables").DB_KEY, //careful key is in not sync file "keys.env" like (DB_KEY="...")
-    database: "jukeStackDB_SimeonSinanJosua",
+    database: "",
 });
 db.connect((err) => {
     if (err) {
