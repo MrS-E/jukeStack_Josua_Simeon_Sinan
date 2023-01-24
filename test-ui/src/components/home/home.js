@@ -19,10 +19,10 @@ function Home(props) {
                     <table className="table">
                         <thead>
                            <tr>
-                               <th>NFT Name</th>
-                               <th>NFT Interpret</th>
-                               <th>NFT Year</th>
-                               <th>NFT Length</th>
+                               <th>Name</th>
+                               <th>Interpret</th>
+                               <th>Year</th>
+                               <th>Length</th>
                                <th>Lending start</th>
                            </tr>
                         </thead>

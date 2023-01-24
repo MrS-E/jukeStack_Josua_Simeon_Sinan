@@ -76,7 +76,7 @@ function App() { //TESTED
     }
 
     const handleClick_register = () =>{ //function which is triggered by signup button
-        const pwd_regex = /^(?:(?:(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z]))|(?:(?=.*[a-z])(?=.*[A-Z])(?=.*[*.!@$%^&(){}[]:;<>,.?\/~_+-=|\]))|(?:(?=.*[0-9])(?=.*[A-Z])(?=.*[*.!@$%^&(){}[]:;<>,.?\/~_+-=|\]))|(?:(?=.*[0-9])(?=.*[a-z])(?=.*[*.!@$%^&(){}[]:;<>,.?\/~_+-=|\]))).{8,32}$/ //regex from https://www.ocpsoft.org/tutorials/regular-expressions/password-regular-expression/
+        const pwd_regex = /^(?:(?:(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z]))|(?:(?=.*[a-z])(?=.*[A-Z])(?=.*[*.!@$%^&(){}\[\]:;<>,.?\/~_+-=|]))|(?:(?=.*[0-9])(?=.*[A-Z])(?=.*[*.!@$%^&(){}\[\]:;<>,.?\/~_+-=|]))|(?:(?=.*[0-9])(?=.*[a-z])(?=.*[*.!@$%^&(){}\[\]:;<>,.?\/~_+-=|]))).{8,50}$/ //regex from https://www.ocpsoft.org/tutorials/regular-expressions/password-regular-expression/
         const mail_regex = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/; //regex from https://emailregex.com/
         //console.log(pwd_regex.test(pwd_reg_ref.current.value))
         changeRegFail(""); //changes failure message to empty string
@@ -118,11 +118,12 @@ function App() { //TESTED
                 <BrowserRouter>
                     <div>
                         <Navbar collapseOnSelect expand="sm" bg="dark" variant="dark">
+                            <Navbar.Brand>SiSiJo</Navbar.Brand>
                             <Navbar.Toggle aria-controls="navbarScrools" data-bs-target="#navbarScroll" />
                             <Navbar.Collapse id="navbarScroll">
                                 <Nav>
-                                    <NavLink eventKey={1} as={Link} to="/">Login</NavLink>
-                                    <NavLink eventKey={2} as={Link} to="/register">Register</NavLink>
+                                    <NavLink eventKey={0} as={Link} to="/">Login</NavLink>
+                                    <NavLink eventKey={1} as={Link} to="/register">Register</NavLink>
                                 </Nav>
                             </Navbar.Collapse>
                         </Navbar>
@@ -183,7 +184,7 @@ function App() { //TESTED
                                                 className="form-control mt-1"
                                                 placeholder="Enter password"
                                             />
-                                            <span className="fs-6" >Please use 8 and more letters but less then 50, at least one digit, one lowercase character, one uppercase character, one special character</span>
+                                            <span className="fs-6" >Please use 8 and more letters but less than 50, at least one digit, one lowercase character, one uppercase character, one special character</span>
                                         </div>
                                         <div className="d-grid gap-2 mt-3">
                                             <button

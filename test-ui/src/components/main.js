@@ -26,10 +26,10 @@ function Main(props) {
                             <Navbar.Collapse id="navbarScroll">
                                 <Nav className="me-auto my-2 my-lg-0" navbarScroll>
                                     <NavLink eventKey={0} as={Link} to="/">Home</NavLink>
-                                    <NavLink eventKey={1} as={Link} to="/user">User</NavLink>
-                                    <NavLink eventKey={2} as={Link} to="/nft/all">Lend Songs</NavLink>
+                                    <NavLink eventKey={1} as={Link} to="/nft/all">Lend</NavLink>
+                                    <NavLink eventKey={2} as={Link} to="/nft/rent">Lending</NavLink>
                                     <NavLink eventKey={3} as={Link} to="/nft/history">History</NavLink>
-                                    <NavLink eventKey={4} as={Link} to="/nft/rent">Rented Songs</NavLink>
+                                    <NavLink eventKey={4} as={Link} to="/user">User</NavLink>
                                     {props.admin?<NavDropdown title="Admin">
                                         <NavDropdown.Item eventKey={5} as={Link} to="/admin/users">Users</NavDropdown.Item>
                                         <NavDropdown.Item eventKey={6} as={Link} to="/admin/nfts">NFTs</NavDropdown.Item>
