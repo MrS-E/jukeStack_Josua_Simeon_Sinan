@@ -9,7 +9,7 @@ import { useCookies } from 'react-cookie'; //to use cookies
 
 function App() { //TESTED
     const [cookies, setCookie] = useCookies(['user']); //to set and get cookies to 'user'
-    const domain = "http:// :5000"; //so domain is only once defined
+    const domain = "http://:5000"; //so domain is only once defined
     /*Stuff for login*/
     const user_ref = useRef(null);
     const pwd_ref = useRef(null);
@@ -99,9 +99,9 @@ function App() { //TESTED
                 })
                 .catch();
         }else{
-            if(pwd_regex.test(pwd_reg_ref.current.value)){
+            if(!pwd_regex.test(pwd_reg_ref.current.value)){
                 changeRegFail("Please check if password matches requirements.");
-            }else if(mail_regex.test(mail_reg_ref.current.value)){
+            }else if(!mail_regex.test(mail_reg_ref.current.value)){
                 changeRegFail("Please check if mail is defined and is a viable email address.");
             }
             else{
