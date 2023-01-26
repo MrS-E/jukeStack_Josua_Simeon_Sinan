@@ -1,7 +1,7 @@
 import axios from "axios";
 import React, {useEffect, useRef, useState} from "react";
 import {BrowserRouter, Link, Route, Routes} from "react-router-dom";
-import {Nav, Navbar, NavLink} from "react-bootstrap";
+import {Nav, Navbar, NavLink, Container} from "react-bootstrap";
 import Main from "./components/main";
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { useCookies } from 'react-cookie'; //to use cookies
@@ -9,7 +9,7 @@ import { useCookies } from 'react-cookie'; //to use cookies
 
 function App() { //TESTED
     const [cookies, setCookie] = useCookies(['user']); //to set and get cookies to 'user'
-    const domain = "http://localhost:5000"; //so domain is only once defined
+    const domain = "http:// :5000"; //so domain is only once defined
     /*Stuff for login*/
     const user_ref = useRef(null);
     const pwd_ref = useRef(null);
@@ -81,7 +81,7 @@ function App() { //TESTED
         //console.log(pwd_regex.test(pwd_reg_ref.current.value))
         changeRegFail(""); //changes failure message to empty string
         sub_reg_ref.current.setAttribute("disabled", true); //sets attribute to signup button
-        if(pwd_regex.test(pwd_reg_ref.current.value) || mail_regex.test(mail_reg_ref.current.value)) {
+        if(pwd_regex.test(pwd_reg_ref.current.value) && mail_regex.test(mail_reg_ref.current.value)) {
             axios.post(domain + "/register", {
                 mail: mail_reg_ref.current.value,
                 salutation: salu,
@@ -118,14 +118,16 @@ function App() { //TESTED
                 <BrowserRouter>
                     <div>
                         <Navbar collapseOnSelect expand="sm" bg="dark" variant="dark">
-                            <Navbar.Brand>SiSiJo</Navbar.Brand>
-                            <Navbar.Toggle aria-controls="navbarScrools" data-bs-target="#navbarScroll" />
-                            <Navbar.Collapse id="navbarScroll">
-                                <Nav>
-                                    <NavLink eventKey={0} as={Link} to="/">Login</NavLink>
-                                    <NavLink eventKey={1} as={Link} to="/register">Register</NavLink>
-                                </Nav>
-                            </Navbar.Collapse>
+                            <Container fluid>
+                                <Navbar.Brand>SiSiJo</Navbar.Brand>
+                                <Navbar.Toggle aria-controls="navbarScrools" data-bs-target="#navbarScroll" />
+                                <Navbar.Collapse id="navbarScroll">
+                                    <Nav>
+                                        <NavLink eventKey={0} as={Link} to="/">Login</NavLink>
+                                        <NavLink eventKey={1} as={Link} to="/register">Register</NavLink>
+                                    </Nav>
+                                </Navbar.Collapse>
+                            </Container>
                         </Navbar>
                     </div>
                     <div className="container">
